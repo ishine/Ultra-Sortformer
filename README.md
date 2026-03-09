@@ -1,12 +1,14 @@
 # Ultra Diar Streaming Sortformer (8-Speaker)
 
+[![Model on Hugging Face](https://huggingface.co/datasets/huggingface/badges/resolve/main/model-on-hf-md.svg)](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1.0.0)
+
 This project extends **NVIDIA Streaming Sortformer** speaker diarization from **4 speakers to 8 speakers**. The original [diar_streaming_sortformer_4spk-v2.1](https://huggingface.co/nvidia/diar_streaming_sortformer_4spk-v2.1) supports up to 4 speakers; we modified the model architecture and trained it to handle 5–8 speakers.
 
 ## Hugging Face
 
-The 8-speaker model is available on Hugging Face:
+The 8-speaker model is **public** on Hugging Face. You can use it with `from_pretrained()` without this repo:
 
-> 🔗 **Model**: [devsy0117/ultra_diar_streaming_sortformer_8spk_v1.0.0](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1.0.0)  
+> 🔗 **[devsy0117/ultra_diar_streaming_sortformer_8spk_v1.0.0](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1.0.0)**  
 > 📂 **Code & experiments**: [GitHub - Ultra-Sortformer](https://github.com/LilDevsy0117/Ultra-Sortformer) *(will be public later)*
 
 ### Model Versions
