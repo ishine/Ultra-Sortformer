@@ -25,6 +25,7 @@ This model extends **NVIDIA Sortformer** speaker diarization from **4 speakers t
 - **Base model**: NVIDIA Sortformer (streaming speaker diarization)
 - **Extension**: 4spk → 8spk
 - **Framework**: NeMo (NVIDIA)
+- **Version**: 1.0.0 (see [CHANGELOG](https://github.com/LilDevsy0117/Ultra-Sortformer/blob/main/CHANGELOG.md) for updates)
 
 ## GitHub
 

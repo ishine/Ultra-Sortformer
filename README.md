@@ -9,6 +9,12 @@ The 8-speaker model is available on Hugging Face:
 > 🔗 **Model**: [Hugging Face - Ultra-Sortformer 8spk](https://huggingface.co/) *(add link after upload)*  
 > 📂 **Code & experiments**: [GitHub - Ultra-Sortformer](https://github.com/LilDevsy0117/Ultra-Sortformer)
 
+### Model Versions
+
+| Version | Date       | Val F1 | Notes                    |
+|---------|------------|--------|--------------------------|
+| v1.0.0  | 2025-03-09 | 0.9884 | First release (best_09884) |
+
 ## Project Structure
 
 ```
@@ -46,6 +52,16 @@ python scripts/extend_sortformer_4spk_to_5spk.py --src <4spk.nemo> --dst_config 
 
 - NeMo (referenced in scripts)
 - PyTorch, omegaconf
+
+## Model Updates
+
+When you release a new version:
+
+1. Update `CHANGELOG.md` with the new version and changes
+2. Update the "Model Versions" table above
+3. Update `VERSION` file
+4. Upload the new model to Hugging Face
+5. (Optional) Create a git tag: `git tag v1.1.0 && git push origin v1.1.0`
 
 ## License
 
