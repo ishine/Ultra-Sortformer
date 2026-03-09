@@ -1,0 +1,45 @@
+# ===== 데이터 (대용량) =====
+data/
+synthetic_data/
+output/
+results/
+temp/
+test/
+
+# ===== 모델 (대용량) =====
+*.nemo
+*.ckpt
+*.pt
+*.pth
+models/
+diar_streaming_sortformer_4spk-v2.1/
+
+# ===== 외부 프로젝트 (업로드 제외) =====
+mago-speaker-diarization/
+NeMo/
+
+# ===== Python =====
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+
+# ===== 로그 =====
+*.log
+nohup.out
+
+# ===== IDE / OS =====
+.idea/
+.vscode/
+.DS_Store
+
+# ===== 트레이닝 산출물 (설정만 올림) =====
+streaming_sortformer_diar_train/**/events.out.tfevents.*
+streaming_sortformer_diar_train/**/cmd-args.log
+streaming_sortformer_diar_train/**/nemo_*.txt
+streaming_sortformer_diar_train/**/lightning_logs.txt
+streaming_sortformer_diar_train/**/run_*/
