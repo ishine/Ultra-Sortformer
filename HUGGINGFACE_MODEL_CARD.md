@@ -1,17 +1,58 @@
-# Hugging Face 모델 카드에 넣을 내용
+# Hugging Face Model Card Content (English)
 
-Hugging Face에 Ultra-Sortformer 8spk 모델을 업로드할 때, 모델 카드(README)에 아래 내용을 포함하세요.
+Copy the content below into your Hugging Face model card (README.md).
 
 ---
 
+## Short version (if space is limited)
+
+# Ultra-Sortformer (8-Speaker)
+
+Extends NVIDIA Sortformer from 4 to 8 speakers for speaker diarization.
+
+**GitHub (code, training, inference)**: https://github.com/LilDevsy0117/Ultra-Sortformer
+
+---
+
+## Full version
+
+# Ultra-Sortformer (8-Speaker)
+
+This model extends **NVIDIA Sortformer** speaker diarization from **4 speakers to 8 speakers**. The original Sortformer supports up to 4 speakers; this model expands the capability to handle 5–8 speakers through fine-tuning and architectural modifications.
+
+## Model Details
+
+- **Base model**: NVIDIA Sortformer (streaming speaker diarization)
+- **Extension**: 4spk → 8spk
+- **Framework**: NeMo (NVIDIA)
+
 ## GitHub
 
-실험 과정, 학습 설정, 추론 스크립트 등은 GitHub에서 확인할 수 있습니다:
+For the full experimental pipeline, training scripts, inference code, and hyperparameters:
 
-**https://github.com/LilDevsy0117/Ultra-Sortformer**
+- **Repository**: [https://github.com/LilDevsy0117/Ultra-Sortformer](https://github.com/LilDevsy0117/Ultra-Sortformer)
+- Inference script: `scripts/diarize_inference.py`
+- Model extension script: `scripts/extend_sortformer_4spk_to_5spk.py`
+- Training configs: 5spk, 8spk experiments in `streaming_sortformer_diar_train/`
 
-- 4spk → 8spk 모델 확장 실험 코드
-- 추론 스크립트 (`scripts/diarize_inference.py`)
-- 트레이닝 하이퍼파라미터 (5spk, 8spk 실험)
+## Usage
+
+```python
+# Inference script (requires NeMo)
+from nemo.collections.asr.models import SortformerEncLabelModel
+
+model = SortformerEncLabelModel.restore_from("path/to/ultra_sortformer_8spk.nemo")
+# Run diarization on your audio...
+```
+
+Or via command line:
+
+```bash
+python scripts/diarize_inference.py --model_path <path_to.nemo> --audio_dir <dir> --output_dir <dir>
+```
+
+## License
+
+Based on NVIDIA NeMo. See the relevant license for terms.
 
 ---
