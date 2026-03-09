@@ -8,7 +8,8 @@
 
 8명 확장 모델은 Hugging Face에 공개됩니다:
 
-> 🔗 **모델**: [Hugging Face - Ultra-Sortformer 8spk](https://huggingface.co/) *(업로드 후 링크 추가)*
+> 🔗 **모델**: [Hugging Face - Ultra-Sortformer 8spk](https://huggingface.co/) *(업로드 후 링크 추가)*  
+> 📂 **실험 코드/과정**: [GitHub - Ultra-Sortformer](https://github.com/LilDevsy0117/Ultra-Sortformer)
 
 ## 프로젝트 구조
 
