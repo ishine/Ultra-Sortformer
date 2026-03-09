@@ -35,6 +35,7 @@ The 8-speaker model is available on Hugging Face:
 | `scripts/create_path_files.py` | Path file generation |
 | `scripts/generate_rttm.py` | RTTM file generation |
 | `scripts/sentence_level_multispeaker_simulator.py` | Multispeaker synthetic data simulator |
+| `scripts/ckpt_to_nemo.py` | Convert .ckpt to .nemo for Hugging Face upload |
 
 ## Usage
 
@@ -46,6 +47,11 @@ python scripts/diarize_inference.py --model_path <path_to.nemo> --audio_dir <dir
 ### Extend 4spk → 8spk
 ```bash
 python scripts/extend_sortformer_4spk_to_5spk.py --src <4spk.nemo> --dst_config <8spk_config> --out <8spk.nemo>
+```
+
+### Convert checkpoint to .nemo (for Hugging Face)
+```bash
+python scripts/ckpt_to_nemo.py --ckpt path/to/best.ckpt --out ultra_sortformer_8spk_v1.0.0.nemo
 ```
 
 ## Requirements
