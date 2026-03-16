@@ -334,64 +334,54 @@ python scripts/sentence_level_multispeaker_simulator.py \
     --mean_overlap 0.15
 ```
 
-### Training Manifest Composition
-
-For 5spk and 6spk fine-tuning, manifests are assembled by randomly sampling from the above datasets while ensuring **no overlap with previously used samples**:
-
-| Model | Train | Val | Datasets Used |
-|-------|-------|-----|---------------|
-| 5spk v1 | 250 | ~60 | synthetic 2–5spk (ov0.05), AliMeeting, AMI IHM, AMI SDM |
-| 5spk splitlr | 800 | 200 | synthetic 2–5spk (ov0.05), AliMeeting, AMI IHM, AMI SDM (100 each) |
-| 6spk v1 | 800 | 200 | synthetic 2–6spk (ov0.05), AliMeeting, AMI IHM, AMI SDM (100 each) |
-| 6spk v2 | 1,600 | 400 | Same sources, doubled (200 each), no overlap with prior runs |
 
 ---
 
 ## Evaluation Results
 
-All evaluations use:
-- Post-processing: onset=0.25s, offset=0.25s, min_duration_on=0.0s, min_duration_off=0.0s
-- Collar: 0.25s
-- Ignore overlap: False
+Comparison of `ultra_diar_streaming_sortformer_5spk_v1.0` vs the base model `diar_streaming_sortformer_4spk-v2.1`.
 
-### Model Progression Summary
+### Evaluation Parameters
 
-| Model | Max Spk | Val F1 | Base |
-|-------|---------|--------|------|
-| diar_streaming_sortformer_4spk-v2.1 | 4 | — | NVIDIA (baseline) |
-| sortformer_5spk_splitlr_1e5_1e4 | 5 | 0.9583 | Extended from 4spk |
-| sortformer_6spk_splitlr_1e5_1e4_v2 | 6 | — | Extended from 5spk |
-| ultra_diar_streaming_sortformer_8spk_v1.0.0 | 8 | 0.9884 | Extended from 4spk |
+| Parameter | Value |
+|-----------|-------|
+| Post-processing | None |
+| Collar | 0.25s |
+| Ignore overlap | False |
+| Chunk size | 340 frames |
+| Batch size | 1 |
 
-### Synthetic Validation (2–8 speakers)
+### AliMeeting (test)
 
-| Dataset | 4spk baseline | 5spk model | 6spk v2 |
-|---------|-------------|-----------|---------|
-| val_2spk DER | 15.26% | 0.04% | **0.00%** |
-| val_3spk DER | 22.07% | 1.07% | **0.48%** |
-| val_4spk DER | 25.19% | 2.01% | **0.88%** |
-| val_5spk DER | 28.16% | 4.09% | **2.38%** |
-| val_6spk DER | 34.59% | 9.96% | **4.22%** |
-| val_2spk Spk_Acc | 100% | 100% | 99% |
-| val_3spk Spk_Acc | 67% | 93% | **99%** |
-| val_4spk Spk_Acc | 54% | 92% | **98%** |
-| val_5spk Spk_Acc | 0% | 77% | **81%** |
-| val_6spk Spk_Acc | 0% | 0% | **69%** |
+| Model | DER | FA | MISS | CER | Spk_Count_Acc |
+|-------|-----|----|------|-----|---------------|
+| diar_streaming_sortformer_4spk-v2.1 (base) | 11.03% | 0.40% | 9.93% | 0.70% | 95.00% |
+| ultra_diar_streaming_sortformer_5spk_v1.0 | **5.85%** | 1.03% | 3.80% | 1.01% | 65.00% |
 
-### Real-World Datasets
+### AMI IHM (test)
 
-| Dataset | 4spk baseline | 5spk model | 6spk v2 |
-|---------|-------------|-----------|---------|
-| AliMeeting DER | 11.03% | 5.85% | **6.28%** |
-| AMI IHM DER | 26.05% | 10.98% | 13.58% |
-| AMI SDM DER | 28.29% | 14.33% | **14.81%** |
-| CallHome ENG DER | 4.94% | 7.39% | 7.89% |
-| CallHome DEU DER | 6.70% | 6.98% | 7.68% |
-| CallHome JPN DER | 10.03% | 10.59% | 11.06% |
-| CallHome SPA DER | 23.27% | 17.92% | 19.38% |
-| CallHome ZHO DER | 7.15% | 9.24% | 9.24% |
+| Model | DER | FA | MISS | CER | Spk_Count_Acc |
+|-------|-----|----|------|-----|---------------|
+| diar_streaming_sortformer_4spk-v2.1 (base) | 26.05% | 0.50% | 23.51% | 2.03% | 93.75% |
+| ultra_diar_streaming_sortformer_5spk_v1.0 | **10.98%** | 1.48% | 7.79% | 1.71% | 68.75% |
 
-> **Note**: 4spk baseline shows high DER on multi-speaker real-world data because it caps at 4 speakers, causing many speaker confusion errors.
+### AMI SDM (test)
+
+| Model | DER | FA | MISS | CER | Spk_Count_Acc |
+|-------|-----|----|------|-----|---------------|
+| diar_streaming_sortformer_4spk-v2.1 (base) | 28.29% | 0.82% | 23.76% | 3.72% | 93.75% |
+| ultra_diar_streaming_sortformer_5spk_v1.0 | **14.33%** | 2.09% | 8.33% | 3.91% | 87.50% |
+
+### CallHome (test)
+
+| Model | eng | deu | jpn | spa | zho |
+|-------|-----|-----|-----|-----|-----|
+| diar_streaming_sortformer_4spk-v2.1 (base) DER | 4.94% | 6.70% | 10.03% | 23.27% | 7.15% |
+| ultra_diar_streaming_sortformer_5spk_v1.0 DER | 7.39% | 6.98% | 10.59% | **17.92%** | 9.24% |
+| diar_streaming_sortformer_4spk-v2.1 (base) Spk_Acc | 83.57% | 80.83% | 79.17% | 63.57% | 72.86% |
+| ultra_diar_streaming_sortformer_5spk_v1.0 Spk_Acc | **87.86%** | **86.67%** | **83.33%** | **72.14%** | 72.86% |
+
+> **Note**: The base model (v2.1) is hard-limited to 4 speakers. The DER improvement on AliMeeting and AMI reflects the reduced MISS rate from correctly predicting 5th speaker activity. Lower `Spk_Count_Acc` on some datasets reflects the trade-off of extending to 5-speaker support.
 
 ---
 
