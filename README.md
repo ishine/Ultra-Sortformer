@@ -111,13 +111,6 @@ single_hidden_to_spks_base  (N_base speakers)   ← preserved weights
 single_hidden_to_spks_new   (N_new speakers)    ← new/extended weights
 ```
 
-```bash
-python scripts/extend_output_layer.py \
-    --src diar_streaming_sortformer_4spk-v2.1.nemo \
-    --dst-spk 5 \
-    --out diar_streaming_sortformer_5spk_orthogonal.nemo
-```
-
 ---
 
 ### Step 2: Split Learning Rate Training
