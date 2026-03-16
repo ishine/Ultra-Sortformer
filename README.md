@@ -1,11 +1,13 @@
 # Ultra-Sortformer: Extending NVIDIA Sortformer to N Speakers
 
 [![5spk Model on Hugging Face](https://huggingface.co/datasets/huggingface/badges/resolve/main/model-on-hf-md.svg)](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_5spk_v1)
-[![8spk Model on Hugging Face](https://huggingface.co/datasets/huggingface/badges/resolve/main/model-on-hf-md.svg)](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1.0.0)
+[![8spk Model on Hugging Face (v0)](https://huggingface.co/datasets/huggingface/badges/resolve/main/model-on-hf-md.svg)](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v0)
 
 This project documents the ongoing journey of extending **NVIDIA's Streaming Sortformer** speaker diarization model from 4 speakers toward 8 speakers — without retraining from scratch. The core idea is to surgically expand the output layer using orthogonal initialization, then fine-tune with differential learning rates to preserve existing knowledge while teaching the model new speakers.
 
-> **Current status**: 5spk ✅ → 6spk 🔄 → 7spk (planned) → 8spk (planned)
+> **Current status**: 5spk ✅ → 6spk 🔄 → 7spk (planned) → 8spk v0 ⚠️ (preliminary)
+>
+> An initial 4→8 direct extension (`8spk_v0`) was released on Hugging Face but showed unsatisfactory performance — motivating the current step-by-step approach to preserve quality at each stage.
 
 ---
 
@@ -224,7 +226,9 @@ python scripts/plot_layer_heatmap.py \
 
 ### Step 4: Extending to 6, 7, 8 Speakers (In Progress 🔄)
 
-The same orthogonal extension + split learning rate process is being applied iteratively to reach 6, 7, and 8 speakers. Each step starts from the previous model:
+A direct 4→8 extension (`8spk_v0`) was attempted first but produced unsatisfactory performance. The iterative approach was adopted to progressively build quality at each speaker count before moving to the next.
+
+Each step starts from the previous model:
 
 ```
 4spk (NVIDIA baseline)
@@ -234,8 +238,8 @@ The same orthogonal extension + split learning rate process is being applied ite
                  └─ 6spk 🔄
                       └─ extend_output_layer.py → fine-tune (split LR)
                            └─ 7spk (planned)
-                                └─ ...
-                                     └─ 8spk (planned)
+                                └─ extend_output_layer.py → fine-tune (split LR)
+                                     └─ 8spk v1 (planned, supersedes v0)
 ```
 
 For each step:
