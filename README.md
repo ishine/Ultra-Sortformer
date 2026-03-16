@@ -2,7 +2,9 @@
 
 [![Model on Hugging Face](https://huggingface.co/datasets/huggingface/badges/resolve/main/model-on-hf-md.svg)](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1.0.0)
 
-This project documents the journey of extending **NVIDIA's Streaming Sortformer** speaker diarization model from 4 speakers to 5, 6, and 8 speakers — without retraining from scratch. The core idea is to surgically expand the output layer using orthogonal initialization, then fine-tune with differential learning rates to preserve existing knowledge while teaching the model new speakers.
+This project documents the ongoing journey of extending **NVIDIA's Streaming Sortformer** speaker diarization model from 4 speakers toward 8 speakers — without retraining from scratch. The core idea is to surgically expand the output layer using orthogonal initialization, then fine-tune with differential learning rates to preserve existing knowledge while teaching the model new speakers.
+
+> **Current status**: 5spk ✅ → 6spk 🔄 → 7spk (planned) → 8spk (planned)
 
 ---
 
@@ -14,8 +16,7 @@ This project documents the journey of extending **NVIDIA's Streaming Sortformer*
    - [Step 1: Output Layer Extension (4 → 5spk)](#step-1-output-layer-extension-4--5spk)
    - [Step 2: Split Learning Rate Training](#step-2-split-learning-rate-training)
    - [Step 3: Layer Repeat Experiments (LLM Neuroanatomy)](#step-3-layer-repeat-experiments-llm-neuroanatomy)
-   - [Step 4: Extending to 6 Speakers](#step-4-extending-to-6-speakers)
-   - [Step 5: Extending to 8 Speakers](#step-5-extending-to-8-speakers)
+   - [Step 4: Extending to 6–8 Speakers (In Progress)](#step-4-extending-to-6-7-8-speakers-in-progress-)
 4. [Evaluation Results](#evaluation-results)
 5. [Scripts](#scripts)
 6. [Usage](#usage)
@@ -228,33 +229,40 @@ python scripts/plot_layer_heatmap.py \
 
 ---
 
-### Step 4: Extending to 6 Speakers
+### Step 4: Extending to 6, 7, 8 Speakers (In Progress 🔄)
 
-Starting from the trained `sortformer_5spk_splitlr_1e5_1e4` model, we extended to 6 speakers using the same orthogonal extension technique:
+The same orthogonal extension + split learning rate process is being applied iteratively to reach 6, 7, and 8 speakers. Each step starts from the previous model:
 
-```bash
-python scripts/extend_output_layer.py \
-    --src sortformer_5spk_splitlr_1e5_1e4.nemo \
-    --dst-spk 6 \
-    --out sortformer_6spk_split_output.nemo
+```
+4spk (NVIDIA baseline)
+  └─ extend_output_layer.py → fine-tune (split LR)
+       └─ 5spk ✅
+            └─ extend_output_layer.py → fine-tune (split LR)
+                 └─ 6spk 🔄
+                      └─ extend_output_layer.py → fine-tune (split LR)
+                           └─ 7spk (planned)
+                                └─ ...
+                                     └─ 8spk (planned)
 ```
 
-Result: `single_hidden_to_spks_base` (5 speakers) + `single_hidden_to_spks_new` (1 speaker)
+For each step:
+```bash
+# 1. Extend output layer
+python scripts/extend_output_layer.py \
+    --src <N>spk_model.nemo \
+    --dst-spk $((N+1)) \
+    --out $((N+1))spk_split_output.nemo
 
-Training data for 6spk fine-tuning:
-- Synthetic: 2–6 speaker sessions (200 sessions each, 180s, sil=10%, overlap=5%)
-- AliMeeting train: 200 sessions
-- AMI IHM train: 200 sessions
-- AMI SDM train: 200 sessions
-- Total: 1600 train / 400 val
+# 2. Fine-tune with split learning rate
+python NeMo/examples/.../streaming_sortformer_diar_train.py \
+    +init_from_nemo_model=$((N+1))spk_split_output.nemo \
+    model.max_num_of_spks=$((N+1)) \
+    +model.sortformer_modules.n_base_spks=$N \
+    model.lr=1e-5 \
+    +model.optim_new_lr=1e-4
+```
 
----
-
-### Step 5: Extending to 8 Speakers
-
-The same process was applied iteratively to reach 8 speakers. The 8spk model was trained on 7000 sessions (2–8 speakers, 180s) with synthetic Korean speech data.
-
-**Released on Hugging Face**: [devsy0117/ultra_diar_streaming_sortformer_8spk_v1.0.0](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1.0.0)
+Training data for each step uses 200 sessions per dataset (synthetic 2–Nspk + AliMeeting + AMI IHM + AMI SDM), ensuring no overlap with data used in previous steps.
 
 ---
 
