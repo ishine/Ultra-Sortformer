@@ -269,14 +269,16 @@ Training data for each step uses 200 sessions per dataset (synthetic 2–Nspk + 
 
 ## Synthetic Training Data
 
-All synthetic data is generated from **Korean TTS speech** (`multispeaker_speech_synthesis_data`) using `scripts/sentence_level_multispeaker_simulator.py`. The simulator creates multi-speaker sessions by randomly interleaving single-speaker utterances with controlled silence and overlap ratios.
+All synthetic data is generated from **Korean TTS speech** using `scripts/sentence_level_multispeaker_simulator.py`. The simulator creates multi-speaker sessions by randomly interleaving single-speaker utterances with controlled silence and overlap ratios.
 
 ### Source Data
 
-| Source | #Speakers | #Utterances | Language |
-|--------|-----------|-------------|----------|
-| `multispeaker_speech_synthesis_data/Training` | 8,666,803 utterances | — | Korean |
-| `multispeaker_speech_synthesis_data/Validation` | 1,225,244 utterances | — | Korean |
+Single-speaker utterances are sourced from the **[다화자 음성합성 데이터 (Multi-speaker Speech Synthesis Dataset)](https://www.aihub.or.kr/aihubdata/data/view.do?aihubDataSe=data&dataSetSn=542)** provided by [AI-Hub](https://www.aihub.or.kr) (한국지능정보사회진흥원, NIA). This dataset contains recordings from 3,400+ Korean speakers across diverse age groups (10s–60s), totaling 10,152 hours of speech.
+
+| Source | #Utterances | Language |
+|--------|-------------|----------|
+| `multispeaker_speech_synthesis_data/Training` | 8,666,803 | Korean |
+| `multispeaker_speech_synthesis_data/Validation` | 1,225,244 | Korean |
 
 ### Generated Datasets
 
