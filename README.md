@@ -302,17 +302,13 @@ All synthetic data is generated from **Korean TTS speech** (`multispeaker_speech
 
 | Dataset | Sessions | Duration | Speakers | Silence | Overlap |
 |---------|----------|----------|----------|---------|---------|
-| `validation_100sess_2spk_90s_sil0.1_ov0` | 100 | 90s | 2 | ~10% | 0% |
-| `validation_100sess_3spk_90s_sil0.1_ov0` | 100 | 90s | 3 | ~10% | 0% |
-| `validation_100sess_4spk_90s_sil0.1_ov0` | 100 | 90s | 4 | ~10% | 0% |
-| `validation_100sess_5spk_90s_sil0.1_ov0` | 100 | 90s | 5 | ~10% | 0% |
-| `validation_100sess_6spk_90s_sil0.1_ov0` | 100 | 90s | 6 | ~10% | 0% |
-| `validation_100sess_7spk_90s_sil0.1_ov0` | 100 | 90s | 7 | ~10% | 0% |
-| `validation_100sess_8spk_90s_sil0.1_ov0` | 100 | 90s | 8 | ~10% | 0% |
 | `validation_100sess_2spk_90s_sil0.1_ov0.05` | 100 | 90s | 2 | ~10% | ~5% |
 | `validation_100sess_3spk_90s_sil0.1_ov0.05` | 100 | 90s | 3 | ~10% | ~5% |
 | `validation_100sess_4spk_90s_sil0.1_ov0.05` | 100 | 90s | 4 | ~10% | ~5% |
 | `validation_100sess_5spk_90s_sil0.1_ov0.05` | 100 | 90s | 5 | ~10% | ~5% |
+| `validation_100sess_6spk_90s_sil0.1_ov0.05` | 100 | 90s | 6 | ~10% | ~5% |
+| `validation_100sess_7spk_90s_sil0.1_ov0.05` | 100 | 90s | 7 | ~10% | ~5% |
+| `validation_100sess_8spk_90s_sil0.1_ov0.05` | 100 | 90s | 8 | ~10% | ~5% |
 
 ### Overlap Ratio Comparison
 
