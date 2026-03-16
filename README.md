@@ -258,6 +258,91 @@ The same process was applied iteratively to reach 8 speakers. The 8spk model was
 
 ---
 
+## Synthetic Training Data
+
+All synthetic data is generated from **Korean TTS speech** (`multispeaker_speech_synthesis_data`) using `scripts/sentence_level_multispeaker_simulator.py`. The simulator creates multi-speaker sessions by randomly interleaving single-speaker utterances with controlled silence and overlap ratios.
+
+### Source Data
+
+| Source | #Speakers | #Utterances | Language |
+|--------|-----------|-------------|----------|
+| `multispeaker_speech_synthesis_data/Training` | 8,666,803 utterances | — | Korean |
+| `multispeaker_speech_synthesis_data/Validation` | 1,225,244 utterances | — | Korean |
+
+### Generated Datasets
+
+#### Training Sets (180s sessions)
+
+| Dataset | Sessions | Duration | Speakers | Silence | Overlap | Status |
+|---------|----------|----------|----------|---------|---------|--------|
+| `training_1000sess_2spk_180s_sil0.1_ov0.05` | 1,000 | 180s | 2 | ~10% | ~5% | ✅ |
+| `training_1000sess_3spk_180s_sil0.1_ov0.05` | 1,000 | 180s | 3 | ~10% | ~5% | ✅ |
+| `training_1000sess_4spk_180s_sil0.1_ov0.05` | 1,000 | 180s | 4 | ~10% | ~5% | ✅ |
+| `training_1000sess_5spk_180s_sil0.1_ov0.05` | 1,000 | 180s | 5 | ~10% | ~5% | ✅ |
+| `training_1000sess_6spk_180s_sil0.1_ov0.05` | 1,000 | 180s | 6 | ~10% | ~5% | ✅ |
+| `training_1000sess_7spk_180s_sil0.1_ov0.05` | 1,000 | 180s | 7 | ~10% | ~5% | ✅ |
+| `training_1000sess_8spk_180s_sil0.1_ov0.05` | 1,000 | 180s | 8 | ~10% | ~5% | ✅ |
+| `training_1000sess_2spk_180s_sil0.1_ov0.15` | 1,000 | 180s | 2 | ~10% | ~15% | ✅ |
+| `training_1000sess_3spk_180s_sil0.1_ov0.15` | 1,000 | 180s | 3 | ~10% | ~15% | ✅ |
+| `training_1000sess_4spk_180s_sil0.1_ov0.15` | 1,000 | 180s | 4 | ~10% | ~15% | ✅ |
+| `training_1000sess_5spk_180s_sil0.1_ov0.15` | 1,000 | 180s | 5 | ~10% | ~15% | ✅ |
+| `training_1000sess_6spk_180s_sil0.1_ov0.15` | 1,000 | 180s | 6 | ~10% | ~15% | ✅ |
+| `training_1000sess_7spk_180s_sil0.1_ov0.15` | 1,000 | 180s | 7 | ~10% | ~15% | ✅ |
+| `training_1000sess_8spk_180s_sil0.1_ov0.15` | 1,000 | 180s | 8 | ~10% | ~15% | 🔄 |
+
+#### Validation Sets (90s sessions)
+
+| Dataset | Sessions | Duration | Speakers | Silence | Overlap |
+|---------|----------|----------|----------|---------|---------|
+| `validation_100sess_2spk_90s_sil0.1_ov0` | 100 | 90s | 2 | ~10% | 0% |
+| `validation_100sess_3spk_90s_sil0.1_ov0` | 100 | 90s | 3 | ~10% | 0% |
+| `validation_100sess_4spk_90s_sil0.1_ov0` | 100 | 90s | 4 | ~10% | 0% |
+| `validation_100sess_5spk_90s_sil0.1_ov0` | 100 | 90s | 5 | ~10% | 0% |
+| `validation_100sess_6spk_90s_sil0.1_ov0` | 100 | 90s | 6 | ~10% | 0% |
+| `validation_100sess_7spk_90s_sil0.1_ov0` | 100 | 90s | 7 | ~10% | 0% |
+| `validation_100sess_8spk_90s_sil0.1_ov0` | 100 | 90s | 8 | ~10% | 0% |
+| `validation_100sess_2spk_90s_sil0.1_ov0.05` | 100 | 90s | 2 | ~10% | ~5% |
+| `validation_100sess_3spk_90s_sil0.1_ov0.05` | 100 | 90s | 3 | ~10% | ~5% |
+| `validation_100sess_4spk_90s_sil0.1_ov0.05` | 100 | 90s | 4 | ~10% | ~5% |
+| `validation_100sess_5spk_90s_sil0.1_ov0.05` | 100 | 90s | 5 | ~10% | ~5% |
+
+### Overlap Ratio Comparison
+
+Two overlap variants were generated to study model robustness to overlapping speech:
+
+| Variant | Mean Overlap | Mean Silence | Training Purpose |
+|---------|-------------|--------------|-----------------|
+| `ov0.05` | ~5% | ~9% | Standard training (low overlap) |
+| `ov0.15` | ~15% | ~9% | Higher overlap — harder conditions |
+
+> Overlap and silence ratios are **means** across sessions; individual sessions vary significantly (std ~9–10%).
+
+### Generating New Datasets
+
+```bash
+python scripts/sentence_level_multispeaker_simulator.py \
+    --manifest_filepath /path/to/single_speaker_manifest.json \
+    --output_dir /path/to/output_dir \
+    --num_speakers 6 \
+    --num_sessions 1000 \
+    --session_length 180 \
+    --mean_silence 0.1 \
+    --mean_overlap 0.15
+```
+
+### Training Manifest Composition
+
+For 5spk and 6spk fine-tuning, manifests are assembled by randomly sampling from the above datasets while ensuring **no overlap with previously used samples**:
+
+| Model | Train | Val | Datasets Used |
+|-------|-------|-----|---------------|
+| 5spk v1 | 250 | ~60 | synthetic 2–5spk (ov0.05), AliMeeting, AMI IHM, AMI SDM |
+| 5spk splitlr | 800 | 200 | synthetic 2–5spk (ov0.05), AliMeeting, AMI IHM, AMI SDM (100 each) |
+| 6spk v1 | 800 | 200 | synthetic 2–6spk (ov0.05), AliMeeting, AMI IHM, AMI SDM (100 each) |
+| 6spk v2 | 1,600 | 400 | Same sources, doubled (200 each), no overlap with prior runs |
+
+---
+
 ## Evaluation Results
 
 All evaluations use:
