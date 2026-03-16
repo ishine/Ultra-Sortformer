@@ -261,7 +261,7 @@ Training data for each step uses 200 sessions per dataset (synthetic 2–Nspk + 
 
 ## Synthetic Training Data
 
-All synthetic data is generated from **Korean TTS speech** using `scripts/sentence_level_multispeaker_simulator.py`. The simulator creates multi-speaker sessions by randomly interleaving single-speaker utterances with controlled silence and overlap ratios.
+All synthetic data is generated from **Korean TTS speech** using `scripts/sentence_level_multispeaker_simulator.py`, a customized version of NeMo's [`data_simulator.py`](https://github.com/NVIDIA/NeMo/blob/main/tools/speech_data_simulator/data_simulator.py). The original script was modified to operate at the **sentence level** — interleaving complete single-speaker utterances rather than splitting at the word/phoneme level — which better reflects natural conversational turn-taking. It creates multi-speaker sessions with controlled silence and overlap ratios.
 
 ### Source Data
 
