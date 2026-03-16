@@ -281,60 +281,12 @@ Single-speaker utterances are sourced from the **[다화자 음성합성 데이�
 
 ### Generated Datasets
 
-#### Training Sets (180s sessions)
+Two overlap variants were generated for 2–8 speakers to study robustness to overlapping speech:
 
-| Dataset | Sessions | Duration | Speakers | Silence | Overlap | Status |
-|---------|----------|----------|----------|---------|---------|--------|
-| `training_1000sess_2spk_180s_sil0.1_ov0.05` | 1,000 | 180s | 2 | ~10% | ~5% | ✅ |
-| `training_1000sess_3spk_180s_sil0.1_ov0.05` | 1,000 | 180s | 3 | ~10% | ~5% | ✅ |
-| `training_1000sess_4spk_180s_sil0.1_ov0.05` | 1,000 | 180s | 4 | ~10% | ~5% | ✅ |
-| `training_1000sess_5spk_180s_sil0.1_ov0.05` | 1,000 | 180s | 5 | ~10% | ~5% | ✅ |
-| `training_1000sess_6spk_180s_sil0.1_ov0.05` | 1,000 | 180s | 6 | ~10% | ~5% | ✅ |
-| `training_1000sess_7spk_180s_sil0.1_ov0.05` | 1,000 | 180s | 7 | ~10% | ~5% | ✅ |
-| `training_1000sess_8spk_180s_sil0.1_ov0.05` | 1,000 | 180s | 8 | ~10% | ~5% | ✅ |
-| `training_1000sess_2spk_180s_sil0.1_ov0.15` | 1,000 | 180s | 2 | ~10% | ~15% | ✅ |
-| `training_1000sess_3spk_180s_sil0.1_ov0.15` | 1,000 | 180s | 3 | ~10% | ~15% | ✅ |
-| `training_1000sess_4spk_180s_sil0.1_ov0.15` | 1,000 | 180s | 4 | ~10% | ~15% | ✅ |
-| `training_1000sess_5spk_180s_sil0.1_ov0.15` | 1,000 | 180s | 5 | ~10% | ~15% | ✅ |
-| `training_1000sess_6spk_180s_sil0.1_ov0.15` | 1,000 | 180s | 6 | ~10% | ~15% | ✅ |
-| `training_1000sess_7spk_180s_sil0.1_ov0.15` | 1,000 | 180s | 7 | ~10% | ~15% | ✅ |
-| `training_1000sess_8spk_180s_sil0.1_ov0.15` | 1,000 | 180s | 8 | ~10% | ~15% | 🔄 |
+- **`ov0.05`** — 1,000 training sessions × 2–8 spk (180s), 100 validation sessions × 2–8 spk (90s), ~5% overlap
+- **`ov0.15`** — 1,000 training sessions × 2–8 spk (180s), ~15% overlap (harder conditions)
 
-#### Validation Sets (90s sessions)
-
-| Dataset | Sessions | Duration | Speakers | Silence | Overlap |
-|---------|----------|----------|----------|---------|---------|
-| `validation_100sess_2spk_90s_sil0.1_ov0.05` | 100 | 90s | 2 | ~10% | ~5% |
-| `validation_100sess_3spk_90s_sil0.1_ov0.05` | 100 | 90s | 3 | ~10% | ~5% |
-| `validation_100sess_4spk_90s_sil0.1_ov0.05` | 100 | 90s | 4 | ~10% | ~5% |
-| `validation_100sess_5spk_90s_sil0.1_ov0.05` | 100 | 90s | 5 | ~10% | ~5% |
-| `validation_100sess_6spk_90s_sil0.1_ov0.05` | 100 | 90s | 6 | ~10% | ~5% |
-| `validation_100sess_7spk_90s_sil0.1_ov0.05` | 100 | 90s | 7 | ~10% | ~5% |
-| `validation_100sess_8spk_90s_sil0.1_ov0.05` | 100 | 90s | 8 | ~10% | ~5% |
-
-### Overlap Ratio Comparison
-
-Two overlap variants were generated to study model robustness to overlapping speech:
-
-| Variant | Mean Overlap | Mean Silence | Training Purpose |
-|---------|-------------|--------------|-----------------|
-| `ov0.05` | ~5% | ~9% | Standard training (low overlap) |
-| `ov0.15` | ~15% | ~9% | Higher overlap — harder conditions |
-
-> Overlap and silence ratios are **means** across sessions; individual sessions vary significantly (std ~9–10%).
-
-### Generating New Datasets
-
-```bash
-python scripts/sentence_level_multispeaker_simulator.py \
-    --manifest_filepath /path/to/single_speaker_manifest.json \
-    --output_dir /path/to/output_dir \
-    --num_speakers 6 \
-    --num_sessions 1000 \
-    --session_length 180 \
-    --mean_silence 0.1 \
-    --mean_overlap 0.15
-```
+All sessions use ~10% mean silence. Overlap and silence ratios are means; individual sessions vary (std ~9–10%).
 
 
 ---
