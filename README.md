@@ -217,32 +217,7 @@ Speaker Count Accuracy heatmap (higher = better, layers 14–17 show improvement
 
 ![Spk_Count_Acc Heatmap](results/heatmap_eval_all_realworld_Spk_Count_Acc.png)
 
-Skyline plots (averaged over start positions, showing per-end-layer impact on DER):
 
-![DER Skyline](results/skyline_eval_all_realworld_DER.png)
-
-#### Heatmap Generation
-
-```bash
-# Run full sweep (block sizes 1–18), split across 2 GPUs for speed
-CUDA_VISIBLE_DEVICES=0 python scripts/layer_repeat_experiment.py \
-    --model-path model.nemo --manifest eval_half0.json \
-    --block-size-min 1 --block-size-max 18 \
-    --output results/layer_repeat_half0.json
-
-CUDA_VISIBLE_DEVICES=1 python scripts/layer_repeat_experiment.py \
-    --model-path model.nemo --manifest eval_half1.json \
-    --block-size-min 1 --block-size-max 18 \
-    --output results/layer_repeat_half1.json
-
-# Merge and visualize
-python scripts/merge_layer_repeat_results.py \
-    --inputs results/layer_repeat_half0.json results/layer_repeat_half1.json \
-    --output results/layer_repeat_merged.json
-
-python scripts/plot_layer_heatmap.py \
-    --input results/layer_repeat_merged.json --metric DER
-```
 
 ---
 
