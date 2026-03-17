@@ -1,0 +1,2164 @@
+{
+  "diar_streaming_sortformer_4spk-v2.1": {
+    "model": "/home/devsy/workspace/diar_streaming_sortformer_4spk-v2.1/diar_streaming_sortformer_4spk-v2.1.nemo",
+    "dataset_order": [
+      "val_2spk",
+      "val_3spk",
+      "val_4spk",
+      "val_5spk",
+      "val_6spk",
+      "val_7spk",
+      "val_8spk",
+      "alimeeting",
+      "ami_ihm_test",
+      "ami_sdm_test",
+      "callhome_eng",
+      "callhome_deu",
+      "callhome_jpn",
+      "callhome_spa",
+      "callhome_zho",
+      "kdomainconf_test30",
+      "kdomainconf_val_3_4spk_test30",
+      "kaddress_test30",
+      "kemergency_test30"
+    ],
+    "results": {
+      "alimeeting": {
+        "dataset": "alimeeting",
+        "FA": 0.004,
+        "MISS": 0.0993,
+        "CER": 0.007,
+        "DER": 0.1103,
+        "Spk_Count_Acc": 0.95
+      },
+      "ami_test": {
+        "dataset": "ami_test",
+        "FA": 0.005,
+        "MISS": 0.2351,
+        "CER": 0.0203,
+        "DER": 0.2605,
+        "Spk_Count_Acc": 0.9375
+      },
+      "val_2spk": {
+        "dataset": "val_2spk",
+        "FA": 0.0,
+        "MISS": 0.1521,
+        "CER": 0.0005,
+        "DER": 0.1526,
+        "Spk_Count_Acc": 1.0
+      },
+      "val_3spk": {
+        "dataset": "val_3spk",
+        "FA": 0.0004,
+        "MISS": 0.1541,
+        "CER": 0.0662,
+        "DER": 0.2207,
+        "Spk_Count_Acc": 0.67
+      },
+      "val_4spk": {
+        "dataset": "val_4spk",
+        "FA": 0.002,
+        "MISS": 0.1519,
+        "CER": 0.0981,
+        "DER": 0.2519,
+        "Spk_Count_Acc": 0.54
+      },
+      "val_5spk": {
+        "dataset": "val_5spk",
+        "FA": 0.0013,
+        "MISS": 0.1569,
+        "CER": 0.1233,
+        "DER": 0.2816,
+        "Spk_Count_Acc": 0.0
+      },
+      "val_6spk": {
+        "dataset": "val_6spk",
+        "FA": 0.0016,
+        "MISS": 0.1598,
+        "CER": 0.1846,
+        "DER": 0.3459,
+        "Spk_Count_Acc": 0.0
+      },
+      "val_7spk": {
+        "dataset": "val_7spk",
+        "FA": 0.0014,
+        "MISS": 0.1633,
+        "CER": 0.2408,
+        "DER": 0.4056,
+        "Spk_Count_Acc": 0.0
+      },
+      "val_8spk": {
+        "dataset": "val_8spk",
+        "FA": 0.0009,
+        "MISS": 0.1648,
+        "CER": 0.2758,
+        "DER": 0.4415,
+        "Spk_Count_Acc": 0.0
+      },
+      "callhome_eng": {
+        "dataset": "callhome_eng",
+        "FA": 0.0184,
+        "MISS": 0.0285,
+        "CER": 0.0025,
+        "DER": 0.0494,
+        "Spk_Count_Acc": 0.8357
+      },
+      "callhome_deu": {
+        "dataset": "callhome_deu",
+        "FA": 0.0108,
+        "MISS": 0.0501,
+        "CER": 0.0061,
+        "DER": 0.067,
+        "Spk_Count_Acc": 0.8083
+      },
+      "callhome_jpn": {
+        "dataset": "callhome_jpn",
+        "FA": 0.0169,
+        "MISS": 0.0671,
+        "CER": 0.0163,
+        "DER": 0.1003,
+        "Spk_Count_Acc": 0.7917
+      },
+      "callhome_spa": {
+        "dataset": "callhome_spa",
+        "FA": 0.0275,
+        "MISS": 0.1876,
+        "CER": 0.0176,
+        "DER": 0.2327,
+        "Spk_Count_Acc": 0.6357
+      },
+      "callhome_zho": {
+        "dataset": "callhome_zho",
+        "FA": 0.0145,
+        "MISS": 0.0443,
+        "CER": 0.0127,
+        "DER": 0.0715,
+        "Spk_Count_Acc": 0.7286
+      },
+      "kdomainconf_test30": {
+        "dataset": "kdomainconf_test30",
+        "FA": 0.029623119324191545,
+        "MISS": 0.11649338456080141,
+        "CER": 0.13225223803998992,
+        "DER": 0.2783687419249829,
+        "Spk_Count_Acc": 0.0
+      },
+      "kaddress_test30": {
+        "dataset": "kaddress_test30",
+        "FA": 0.0,
+        "MISS": 0.1079358370624638,
+        "CER": 0.0,
+        "DER": 0.1079358370624638,
+        "Spk_Count_Acc": 1.0
+      },
+      "kemergency_test30": {
+        "dataset": "kemergency_test30",
+        "FA": 0.06723456840977902,
+        "MISS": 0.12539122196362734,
+        "CER": 0.024046299919675385,
+        "DER": 0.2166720902930818,
+        "Spk_Count_Acc": 0.9333333333333333
+      },
+      "kdomainconf_val_3_4spk_test30": {
+        "dataset": "kdomainconf_val_3_4spk_test30",
+        "FA": 0.03188889671075185,
+        "MISS": 0.1144449255799738,
+        "CER": 0.11093032602707621,
+        "DER": 0.25726414831780187,
+        "Spk_Count_Acc": 0.7
+      },
+      "ami_ihm_test": {
+        "dataset": "ami_ihm_test",
+        "FA": 0.00501076552816761,
+        "MISS": 0.23511214381032397,
+        "CER": 0.020340576315905752,
+        "DER": 0.2604634856543973,
+        "Spk_Count_Acc": 0.9375
+      },
+      "ami_sdm_test": {
+        "dataset": "ami_sdm_test",
+        "FA": 0.00815984545173997,
+        "MISS": 0.23756335613626595,
+        "CER": 0.0371867361650816,
+        "DER": 0.28290993775308754,
+        "Spk_Count_Acc": 0.9375
+      }
+    }
+  },
+  "sortformer_5spk_full_v1--val_f1_acc=0.9559-epoch=16": {
+    "model": "streaming_sortformer_diar_train/sortformer_5spk_full_v1/checkpoints/sortformer_5spk_full_v1--val_f1_acc=0.9559-epoch=16.ckpt",
+    "training_info": {
+      "train_manifest": "train_sampled_2to5spk_250.json",
+      "val_manifest": "val_sampled_2to5spk_250.json",
+      "train": {
+        "AMI": 200,
+        "합성_2spk": 200,
+        "합성_3spk": 200,
+        "합성_4spk": 200,
+        "합성_5spk": 200
+      },
+      "val": {
+        "AMI": 50,
+        "합성_2spk": 50,
+        "합성_3spk": 50,
+        "합성_4spk": 50,
+        "합성_5spk": 50
+      }
+    },
+    "dataset_order": [
+      "val_2spk",
+      "val_3spk",
+      "val_4spk",
+      "val_5spk",
+      "val_6spk",
+      "val_7spk",
+      "val_8spk",
+      "alimeeting",
+      "ami_ihm_test",
+      "ami_sdm_test",
+      "callhome_eng",
+      "callhome_deu",
+      "callhome_jpn",
+      "callhome_spa",
+      "callhome_zho",
+      "kdomainconf_test30",
+      "kdomainconf_val_3_4spk_test30",
+      "kaddress_test30",
+      "kemergency_test30"
+    ],
+    "results": {
+      "alimeeting": {
+        "dataset": "alimeeting",
+        "FA": 0.02546580183010987,
+        "MISS": 0.03830925643374405,
+        "CER": 0.021228024879386603,
+        "DER": 0.08500308314324051,
+        "Spk_Count_Acc": 0.65
+      },
+      "ami_ihm_test": {
+        "dataset": "ami_ihm_test",
+        "FA": 0.012751636497400227,
+        "MISS": 0.10270884354409432,
+        "CER": 0.07191548869945402,
+        "DER": 0.18737596874094856,
+        "Spk_Count_Acc": 0.6875
+      },
+      "ami_sdm_test": {
+        "dataset": "ami_sdm_test",
+        "FA": 0.0205005483910447,
+        "MISS": 0.13330219097415547,
+        "CER": 0.06277126481709622,
+        "DER": 0.21657400418229641,
+        "Spk_Count_Acc": 0.75
+      },
+      "val_2spk": {
+        "dataset": "val_2spk",
+        "FA": 0.00035071723057542346,
+        "MISS": 0.0001337760199301215,
+        "CER": 0.0010159069572624488,
+        "DER": 0.0015004002077679936,
+        "Spk_Count_Acc": 0.98
+      },
+      "val_3spk": {
+        "dataset": "val_3spk",
+        "FA": 0.0024328375725503576,
+        "MISS": 3.747546090815914e-05,
+        "CER": 0.006531399368385111,
+        "DER": 0.009001712401843626,
+        "Spk_Count_Acc": 0.94
+      },
+      "val_4spk": {
+        "dataset": "val_4spk",
+        "FA": 0.001821378432667923,
+        "MISS": 0.0015696097877679145,
+        "CER": 0.016081109012376173,
+        "DER": 0.01947209723281201,
+        "Spk_Count_Acc": 0.91
+      },
+      "val_5spk": {
+        "dataset": "val_5spk",
+        "FA": 0.0009643596201048991,
+        "MISS": 0.0058872691352718715,
+        "CER": 0.035641520249398005,
+        "DER": 0.04249314900477478,
+        "Spk_Count_Acc": 0.74
+      },
+      "val_6spk": {
+        "dataset": "val_6spk",
+        "FA": 0.0014839439470500579,
+        "MISS": 0.008938775365338963,
+        "CER": 0.09967636408254812,
+        "DER": 0.11009908339493714,
+        "Spk_Count_Acc": 0.0
+      },
+      "val_7spk": {
+        "dataset": "val_7spk",
+        "FA": 0.002013153508107287,
+        "MISS": 0.020354477951204753,
+        "CER": 0.15410589483255036,
+        "DER": 0.1764735262918624,
+        "Spk_Count_Acc": 0.0
+      },
+      "val_8spk": {
+        "dataset": "val_8spk",
+        "FA": 0.0033169911206554718,
+        "MISS": 0.030193972918104856,
+        "CER": 0.20312289849371062,
+        "DER": 0.23663386253247096,
+        "Spk_Count_Acc": 0.0
+      },
+      "callhome_eng": {
+        "dataset": "callhome_eng",
+        "FA": 0.05906212325741235,
+        "MISS": 0.013687631028608335,
+        "CER": 0.005133962852225013,
+        "DER": 0.0778837171382457,
+        "Spk_Count_Acc": 0.8857142857142857
+      },
+      "callhome_deu": {
+        "dataset": "callhome_deu",
+        "FA": 0.0440128788613242,
+        "MISS": 0.027250173254882427,
+        "CER": 0.010530240712924435,
+        "DER": 0.08179329282913106,
+        "Spk_Count_Acc": 0.8
+      },
+      "callhome_jpn": {
+        "dataset": "callhome_jpn",
+        "FA": 0.046626747743072905,
+        "MISS": 0.05002124908927932,
+        "CER": 0.02000000876774408,
+        "DER": 0.11664800560009629,
+        "Spk_Count_Acc": 0.85
+      },
+      "callhome_spa": {
+        "dataset": "callhome_spa",
+        "FA": 0.04994857627527463,
+        "MISS": 0.17154840470365226,
+        "CER": 0.02112382729429616,
+        "DER": 0.24262080827322308,
+        "Spk_Count_Acc": 0.6642857142857143
+      },
+      "callhome_zho": {
+        "dataset": "callhome_zho",
+        "FA": 0.06137610530577444,
+        "MISS": 0.01917332391142521,
+        "CER": 0.02585952926680201,
+        "DER": 0.10640895848400167,
+        "Spk_Count_Acc": 0.7214285714285714
+      },
+      "kdomainconf_test30": {
+        "dataset": "kdomainconf_test30",
+        "FA": 0.05987701347050708,
+        "MISS": 0.04024569681938388,
+        "CER": 0.09746338826840333,
+        "DER": 0.1975860985582943,
+        "Spk_Count_Acc": 0.6666666666666666
+      },
+      "kdomainconf_val_3_4spk_test30": {
+        "dataset": "kdomainconf_val_3_4spk_test30",
+        "FA": 0.06472176496156276,
+        "MISS": 0.03981849912454243,
+        "CER": 0.1337452226379627,
+        "DER": 0.23828548672406788,
+        "Spk_Count_Acc": 0.3
+      },
+      "kaddress_test30": {
+        "dataset": "kaddress_test30",
+        "FA": 0.0,
+        "MISS": 0.07149364167792306,
+        "CER": 0.0,
+        "DER": 0.07149364167792306,
+        "Spk_Count_Acc": 1.0
+      },
+      "kemergency_test30": {
+        "dataset": "kemergency_test30",
+        "FA": 0.13303400407801771,
+        "MISS": 0.12424525775956172,
+        "CER": 0.03840668959693533,
+        "DER": 0.29568595143451476,
+        "Spk_Count_Acc": 0.9333333333333333
+      }
+    }
+  },
+  "sortformer_5spk_full_v1": {
+    "model": "/home/devsy/workspace/streaming_sortformer_diar_train/sortformer_5spk_full_v1/checkpoints/sortformer_5spk_full_v1.nemo",
+    "dataset_order": [
+      "val_2spk",
+      "val_3spk",
+      "val_4spk",
+      "val_5spk",
+      "val_6spk",
+      "val_7spk",
+      "val_8spk",
+      "alimeeting",
+      "ami_ihm_test",
+      "ami_sdm_test",
+      "callhome_eng",
+      "callhome_deu",
+      "callhome_jpn",
+      "callhome_spa",
+      "callhome_zho",
+      "kdomainconf_test30",
+      "kdomainconf_val_3_4spk_test30",
+      "kaddress_test30",
+      "kemergency_test30"
+    ],
+    "results": {
+      "val_2spk": {
+        "dataset": "val_2spk",
+        "FA": 5.271961376556546e-05,
+        "MISS": 1.0543922753113373e-05,
+        "CER": 8.435138202490511e-05,
+        "DER": 0.00014761491854358395,
+        "Spk_Count_Acc": 1.0
+      },
+      "val_3spk": {
+        "dataset": "val_3spk",
+        "FA": 8.535336292249922e-05,
+        "MISS": 0.0,
+        "CER": 0.006091029361556843,
+        "DER": 0.006176382724479343,
+        "Spk_Count_Acc": 0.94
+      },
+      "val_4spk": {
+        "dataset": "val_4spk",
+        "FA": 0.0005503378857187775,
+        "MISS": 0.0,
+        "CER": 0.008285163853128857,
+        "DER": 0.008835501738847635,
+        "Spk_Count_Acc": 0.97
+      },
+      "val_5spk": {
+        "dataset": "val_5spk",
+        "FA": 0.0007545344288168015,
+        "MISS": 0.002063534459733079,
+        "CER": 0.02529749309578824,
+        "DER": 0.02811556198433812,
+        "Spk_Count_Acc": 0.83
+      },
+      "val_6spk": {
+        "dataset": "val_6spk",
+        "FA": 0.004947958654915779,
+        "MISS": 0.002942282984447429,
+        "CER": 0.08138824749857775,
+        "DER": 0.08927848913794095,
+        "Spk_Count_Acc": 0.0
+      },
+      "val_7spk": {
+        "dataset": "val_7spk",
+        "FA": 0.004230822851947254,
+        "MISS": 0.007491074405212917,
+        "CER": 0.14796787392029098,
+        "DER": 0.15968977117745115,
+        "Spk_Count_Acc": 0.0
+      },
+      "val_8spk": {
+        "dataset": "val_8spk",
+        "FA": 0.009108317018113805,
+        "MISS": 0.012186477266939224,
+        "CER": 0.1971988366178543,
+        "DER": 0.21849363090290733,
+        "Spk_Count_Acc": 0.0
+      },
+      "alimeeting": {
+        "dataset": "alimeeting",
+        "FA": 0.03514233959071808,
+        "MISS": 0.02741147808221613,
+        "CER": 0.04470489031838062,
+        "DER": 0.10725870799131483,
+        "Spk_Count_Acc": 0.15
+      },
+      "ami_ihm_test": {
+        "dataset": "ami_ihm_test",
+        "FA": 0.024329298030684336,
+        "MISS": 0.05869324652069193,
+        "CER": 0.03509990467695677,
+        "DER": 0.11812244922833302,
+        "Spk_Count_Acc": 0.5625
+      },
+      "ami_sdm_test": {
+        "dataset": "ami_sdm_test",
+        "FA": 0.036140146371909265,
+        "MISS": 0.07351944151632499,
+        "CER": 0.08869689794678799,
+        "DER": 0.19835648583502224,
+        "Spk_Count_Acc": 0.1875
+      },
+      "callhome_eng": {
+        "dataset": "callhome_eng",
+        "FA": 0.05381606787413839,
+        "MISS": 0.016597255025370485,
+        "CER": 0.018215639406684976,
+        "DER": 0.08862896230619383,
+        "Spk_Count_Acc": 0.3357142857142857
+      },
+      "callhome_deu": {
+        "dataset": "callhome_deu",
+        "FA": 0.027961452630800833,
+        "MISS": 0.033303208061130185,
+        "CER": 0.018034349647331697,
+        "DER": 0.07929901033926272,
+        "Spk_Count_Acc": 0.425
+      },
+      "callhome_jpn": {
+        "dataset": "callhome_jpn",
+        "FA": 0.032115254488040854,
+        "MISS": 0.060130896420386125,
+        "CER": 0.03824570730672181,
+        "DER": 0.13049185821514878,
+        "Spk_Count_Acc": 0.4083333333333333
+      },
+      "callhome_spa": {
+        "dataset": "callhome_spa",
+        "FA": 0.040868411517693846,
+        "MISS": 0.1756406107854232,
+        "CER": 0.03617052391037358,
+        "DER": 0.2526795462134906,
+        "Spk_Count_Acc": 0.4
+      },
+      "callhome_zho": {
+        "dataset": "callhome_zho",
+        "FA": 0.053673200081866705,
+        "MISS": 0.021559568016512196,
+        "CER": 0.0490317332927408,
+        "DER": 0.1242645013911197,
+        "Spk_Count_Acc": 0.2857142857142857
+      },
+      "kdomainconf_test30": {
+        "dataset": "kdomainconf_test30",
+        "FA": 0.07127848679275046,
+        "MISS": 0.03049918159858176,
+        "CER": 0.10508141080556108,
+        "DER": 0.2068590791968933,
+        "Spk_Count_Acc": 0.7666666666666667
+      },
+      "kdomainconf_val_3_4spk_test30": {
+        "dataset": "kdomainconf_val_3_4spk_test30",
+        "FA": 0.09455685644052458,
+        "MISS": 0.027196747505621174,
+        "CER": 0.10981527397030365,
+        "DER": 0.2315688779164494,
+        "Spk_Count_Acc": 0.16666666666666666
+      },
+      "kaddress_test30": {
+        "dataset": "kaddress_test30",
+        "FA": 0.0,
+        "MISS": 0.0821627147879179,
+        "CER": 0.0,
+        "DER": 0.0821627147879179,
+        "Spk_Count_Acc": 1.0
+      },
+      "kemergency_test30": {
+        "dataset": "kemergency_test30",
+        "FA": 0.15747986736144,
+        "MISS": 0.12016064918748584,
+        "CER": 0.07140979960043664,
+        "DER": 0.3490503161493625,
+        "Spk_Count_Acc": 0.8666666666666667
+      }
+    }
+  },
+  "sortformer_5spk_full_v1_expanded_L10-16": {
+    "model": "/home/devsy/workspace/streaming_sortformer_diar_train/sortformer_5spk_full_v1/checkpoints/sortformer_5spk_full_v1_expanded_L10-16.nemo",
+    "dataset_order": [
+      "val_2spk",
+      "val_3spk",
+      "val_4spk",
+      "val_5spk",
+      "val_6spk",
+      "val_7spk",
+      "val_8spk",
+      "alimeeting",
+      "ami_ihm_test",
+      "ami_sdm_test",
+      "callhome_eng",
+      "callhome_deu",
+      "callhome_jpn",
+      "callhome_spa",
+      "callhome_zho",
+      "kdomainconf_test30",
+      "kdomainconf_val_3_4spk_test30",
+      "kaddress_test30",
+      "kemergency_test30"
+    ],
+    "results": {
+      "val_2spk": {
+        "dataset": "val_2spk",
+        "FA": 0.0,
+        "MISS": 2.1087845506227216e-05,
+        "CER": 0.0002530541460747144,
+        "DER": 0.00027414199158094164,
+        "Spk_Count_Acc": 1.0
+      },
+      "val_3spk": {
+        "dataset": "val_3spk",
+        "FA": 4.267668146124866e-05,
+        "MISS": 0.0008057890918402186,
+        "CER": 0.005453946526118127,
+        "DER": 0.0063024122994195944,
+        "Spk_Count_Acc": 0.93
+      },
+      "val_4spk": {
+        "dataset": "val_4spk",
+        "FA": 0.00013403796734803196,
+        "MISS": 0.08803801958439224,
+        "CER": 0.017571171045041398,
+        "DER": 0.10574322859678167,
+        "Spk_Count_Acc": 0.96
+      },
+      "val_5spk": {
+        "dataset": "val_5spk",
+        "FA": 0.00011150130938014827,
+        "MISS": 0.15365577315768172,
+        "CER": 0.025024314887806858,
+        "DER": 0.17879158935486872,
+        "Spk_Count_Acc": 0.35
+      },
+      "val_6spk": {
+        "dataset": "val_6spk",
+        "FA": 0.001538449447795895,
+        "MISS": 0.15041654878267674,
+        "CER": 0.07081253251316494,
+        "DER": 0.22276753074363756,
+        "Spk_Count_Acc": 0.0
+      },
+      "val_7spk": {
+        "dataset": "val_7spk",
+        "FA": 0.00020100015153810954,
+        "MISS": 0.16760903167146543,
+        "CER": 0.11404067282921657,
+        "DER": 0.2818507046522201,
+        "Spk_Count_Acc": 0.0
+      },
+      "val_8spk": {
+        "dataset": "val_8spk",
+        "FA": 0.0015961178657932442,
+        "MISS": 0.1569001466315928,
+        "CER": 0.15478705088353323,
+        "DER": 0.3132833153809193,
+        "Spk_Count_Acc": 0.0
+      },
+      "alimeeting": {
+        "dataset": "alimeeting",
+        "FA": 0.03167431844681015,
+        "MISS": 0.03076928887198132,
+        "CER": 0.033085766315595726,
+        "DER": 0.0955293736343872,
+        "Spk_Count_Acc": 0.3
+      },
+      "ami_ihm_test": {
+        "dataset": "ami_ihm_test",
+        "FA": 0.024433830048037047,
+        "MISS": 0.07717086761235828,
+        "CER": 0.03872255272772692,
+        "DER": 0.14032725038812224,
+        "Spk_Count_Acc": 0.8125
+      },
+      "ami_sdm_test": {
+        "dataset": "ami_sdm_test",
+        "FA": 0.03273968175883252,
+        "MISS": 0.10231543073708538,
+        "CER": 0.07824454262460145,
+        "DER": 0.21329965512051938,
+        "Spk_Count_Acc": 0.375
+      },
+      "callhome_eng": {
+        "dataset": "callhome_eng",
+        "FA": 0.05039181767602714,
+        "MISS": 0.017165127332936545,
+        "CER": 0.019329155064852728,
+        "DER": 0.08688610007381642,
+        "Spk_Count_Acc": 0.37857142857142856
+      },
+      "callhome_deu": {
+        "dataset": "callhome_deu",
+        "FA": 0.026750320386303244,
+        "MISS": 0.03479693018633363,
+        "CER": 0.021495278381048668,
+        "DER": 0.08304252895368555,
+        "Spk_Count_Acc": 0.35833333333333334
+      },
+      "callhome_jpn": {
+        "dataset": "callhome_jpn",
+        "FA": 0.03106181003478005,
+        "MISS": 0.06352078316443611,
+        "CER": 0.04048648889480986,
+        "DER": 0.13506908209402602,
+        "Spk_Count_Acc": 0.4166666666666667
+      },
+      "callhome_spa": {
+        "dataset": "callhome_spa",
+        "FA": 0.03979242381003373,
+        "MISS": 0.18009106483595017,
+        "CER": 0.03390393634284183,
+        "DER": 0.2537874249888257,
+        "Spk_Count_Acc": 0.35714285714285715
+      },
+      "callhome_zho": {
+        "dataset": "callhome_zho",
+        "FA": 0.05120319861327253,
+        "MISS": 0.02524932301622579,
+        "CER": 0.04633393270066297,
+        "DER": 0.12278645433016129,
+        "Spk_Count_Acc": 0.29285714285714287
+      },
+      "kdomainconf_test30": {
+        "dataset": "kdomainconf_test30",
+        "FA": 0.06177506242016409,
+        "MISS": 0.20835927655844114,
+        "CER": 0.11057318718594317,
+        "DER": 0.38070752616454845,
+        "Spk_Count_Acc": 0.7
+      },
+      "kdomainconf_val_3_4spk_test30": {
+        "dataset": "kdomainconf_val_3_4spk_test30",
+        "FA": 0.08994871268050249,
+        "MISS": 0.13127669040238332,
+        "CER": 0.10647959271377061,
+        "DER": 0.3277049957966564,
+        "Spk_Count_Acc": 0.2
+      },
+      "kaddress_test30": {
+        "dataset": "kaddress_test30",
+        "FA": 0.0,
+        "MISS": 0.08376193345536892,
+        "CER": 0.0,
+        "DER": 0.08376193345536892,
+        "Spk_Count_Acc": 1.0
+      },
+      "kemergency_test30": {
+        "dataset": "kemergency_test30",
+        "FA": 0.15260189895578025,
+        "MISS": 0.11677218709451526,
+        "CER": 0.07856239573249851,
+        "DER": 0.34793648178279396,
+        "Spk_Count_Acc": 0.8
+      }
+    }
+  },
+  "sortformer_5spk_splitlr_1e5_1e4": {
+    "model": "/home/devsy/workspace/streaming_sortformer_diar_train/sortformer_5spk_splitlr_1e5_1e4/checkpoints/sortformer_5spk_splitlr_1e5_1e4.nemo",
+    "dataset_order": [
+      "val_2spk",
+      "val_3spk",
+      "val_4spk",
+      "val_5spk",
+      "val_6spk",
+      "val_7spk",
+      "val_8spk",
+      "alimeeting",
+      "ami_ihm_test",
+      "ami_sdm_test",
+      "callhome_eng",
+      "callhome_deu",
+      "callhome_jpn",
+      "callhome_spa",
+      "callhome_zho",
+      "kdomainconf_test30",
+      "kdomainconf_val_3_4spk_test30",
+      "kaddress_test30",
+      "kemergency_test30"
+    ],
+    "results": {
+      "val_2spk": {
+        "dataset": "val_2spk",
+        "FA": 7.59162438224146e-05,
+        "MISS": 0.00019703955644879845,
+        "CER": 0.00014629692819944552,
+        "DER": 0.0004192527284706586,
+        "Spk_Count_Acc": 1.0
+      },
+      "val_3spk": {
+        "dataset": "val_3spk",
+        "FA": 4.2676681461249134e-05,
+        "MISS": 6.948297200409612e-05,
+        "CER": 0.010543940978149534,
+        "DER": 0.010656100631614878,
+        "Spk_Count_Acc": 0.93
+      },
+      "val_4spk": {
+        "dataset": "val_4spk",
+        "FA": 0.0005376102449023469,
+        "MISS": 0.00015472038367473457,
+        "CER": 0.01942198214709732,
+        "DER": 0.0201143127756744,
+        "Spk_Count_Acc": 0.92
+      },
+      "val_5spk": {
+        "dataset": "val_5spk",
+        "FA": 0.001394653309485557,
+        "MISS": 0.002836694675457707,
+        "CER": 0.036661123700059445,
+        "DER": 0.04089247168500271,
+        "Spk_Count_Acc": 0.77
+      },
+      "val_6spk": {
+        "dataset": "val_6spk",
+        "FA": 0.004854919032712421,
+        "MISS": 0.00409881365608704,
+        "CER": 0.09063035231341621,
+        "DER": 0.09958408500221566,
+        "Spk_Count_Acc": 0.0
+      },
+      "val_7spk": {
+        "dataset": "val_7spk",
+        "FA": 0.005024761327473849,
+        "MISS": 0.009696499469616612,
+        "CER": 0.1548062433702076,
+        "DER": 0.16952750416729806,
+        "Spk_Count_Acc": 0.0
+      },
+      "val_8spk": {
+        "dataset": "val_8spk",
+        "FA": 0.006634334326134267,
+        "MISS": 0.016282984186462245,
+        "CER": 0.20325094000779745,
+        "DER": 0.22616825852039396,
+        "Spk_Count_Acc": 0.0
+      },
+      "alimeeting": {
+        "dataset": "alimeeting",
+        "FA": 0.010341919898702753,
+        "MISS": 0.03803939556659087,
+        "CER": 0.010094375769927402,
+        "DER": 0.05847569123522102,
+        "Spk_Count_Acc": 0.65
+      },
+      "ami_ihm_test": {
+        "dataset": "ami_ihm_test",
+        "FA": 0.014792761678342196,
+        "MISS": 0.07789285798322396,
+        "CER": 0.017122513725011636,
+        "DER": 0.1098081333865778,
+        "Spk_Count_Acc": 0.6875
+      },
+      "ami_sdm_test": {
+        "dataset": "ami_sdm_test",
+        "FA": 0.020870007707437476,
+        "MISS": 0.08330313049269164,
+        "CER": 0.03909624410959978,
+        "DER": 0.14326938230972888,
+        "Spk_Count_Acc": 0.875
+      },
+      "callhome_eng": {
+        "dataset": "callhome_eng",
+        "FA": 0.05734788726903254,
+        "MISS": 0.012874033971963498,
+        "CER": 0.003690760745126681,
+        "DER": 0.07391268198612273,
+        "Spk_Count_Acc": 0.8785714285714286
+      },
+      "callhome_deu": {
+        "dataset": "callhome_deu",
+        "FA": 0.038002700497853745,
+        "MISS": 0.025569266861128443,
+        "CER": 0.006236029315557803,
+        "DER": 0.06980799667453999,
+        "Spk_Count_Acc": 0.8666666666666667
+      },
+      "callhome_jpn": {
+        "dataset": "callhome_jpn",
+        "FA": 0.04466016581511475,
+        "MISS": 0.043532057098964315,
+        "CER": 0.01766947316771511,
+        "DER": 0.10586169608179419,
+        "Spk_Count_Acc": 0.8333333333333334
+      },
+      "callhome_spa": {
+        "dataset": "callhome_spa",
+        "FA": 0.05252503622944708,
+        "MISS": 0.07577380698882379,
+        "CER": 0.05093610482797929,
+        "DER": 0.17923494804625018,
+        "Spk_Count_Acc": 0.7214285714285714
+      },
+      "callhome_zho": {
+        "dataset": "callhome_zho",
+        "FA": 0.05393467484634807,
+        "MISS": 0.015842139502092647,
+        "CER": 0.022573904682166163,
+        "DER": 0.09235071903060688,
+        "Spk_Count_Acc": 0.7285714285714285
+      },
+      "kdomainconf_test30": {
+        "dataset": "kdomainconf_test30",
+        "FA": 0.06055082176288732,
+        "MISS": 0.034826225322318057,
+        "CER": 0.07850691164792539,
+        "DER": 0.17388395873313076,
+        "Spk_Count_Acc": 0.4666666666666667
+      },
+      "kdomainconf_val_3_4spk_test30": {
+        "dataset": "kdomainconf_val_3_4spk_test30",
+        "FA": 0.06841659251813209,
+        "MISS": 0.03336628747911585,
+        "CER": 0.11523576368623639,
+        "DER": 0.21701864368348436,
+        "Spk_Count_Acc": 0.36666666666666664
+      },
+      "kaddress_test30": {
+        "dataset": "kaddress_test30",
+        "FA": 0.0,
+        "MISS": 0.07737362602842614,
+        "CER": 0.0,
+        "DER": 0.07737362602842614,
+        "Spk_Count_Acc": 1.0
+      },
+      "kemergency_test30": {
+        "dataset": "kemergency_test30",
+        "FA": 0.15644182645768542,
+        "MISS": 0.1128441084999897,
+        "CER": 0.05329763351389204,
+        "DER": 0.32258356847156716,
+        "Spk_Count_Acc": 1.0
+      }
+    }
+  },
+  "sortformer_6spk_splitlr_1e5_1e4": {
+    "model": "/home/devsy/workspace/streaming_sortformer_diar_train/sortformer_6spk_splitlr_1e5_1e4/checkpoints/sortformer_6spk_splitlr_1e5_1e4.nemo",
+    "dataset_order": [
+      "val_2spk",
+      "val_3spk",
+      "val_4spk",
+      "val_5spk",
+      "val_6spk",
+      "val_7spk",
+      "val_8spk",
+      "alimeeting",
+      "ami_ihm_test",
+      "ami_sdm_test",
+      "callhome_eng",
+      "callhome_deu",
+      "callhome_jpn",
+      "callhome_spa",
+      "callhome_zho",
+      "kdomainconf_test30",
+      "kdomainconf_val_3_4spk_test30",
+      "kaddress_test30",
+      "kemergency_test30"
+    ],
+    "results": {
+      "val_2spk": {
+        "dataset": "val_2spk",
+        "FA": 1.0543922753112905e-05,
+        "MISS": 9.160032891766848e-05,
+        "CER": 0.0009040095770450371,
+        "DER": 0.0010061538287158185,
+        "Spk_Count_Acc": 0.98
+      },
+      "val_3spk": {
+        "dataset": "val_3spk",
+        "FA": 1.0669170365312165e-05,
+        "MISS": 0.001733873548992829,
+        "CER": 0.006388032391601225,
+        "DER": 0.008132575110959366,
+        "Spk_Count_Acc": 0.96
+      },
+      "val_4spk": {
+        "dataset": "val_4spk",
+        "FA": 4.109967346972358e-05,
+        "MISS": 0.0012567219510306693,
+        "CER": 0.013000091877657145,
+        "DER": 0.014297913502157538,
+        "Spk_Count_Acc": 0.93
+      },
+      "val_5spk": {
+        "dataset": "val_5spk",
+        "FA": 0.0010388627677361782,
+        "MISS": 0.0024156505265142555,
+        "CER": 0.025839288094549044,
+        "DER": 0.02929380138879948,
+        "Spk_Count_Acc": 0.79
+      },
+      "val_6spk": {
+        "dataset": "val_6spk",
+        "FA": 0.003317737154701302,
+        "MISS": 0.0015229850964215026,
+        "CER": 0.04878939480134137,
+        "DER": 0.05363011705246418,
+        "Spk_Count_Acc": 0.66
+      },
+      "val_7spk": {
+        "dataset": "val_7spk",
+        "FA": 0.004434126382785263,
+        "MISS": 0.002200939536293382,
+        "CER": 0.0885988786179724,
+        "DER": 0.09523394453705104,
+        "Spk_Count_Acc": 0.0
+      },
+      "val_8spk": {
+        "dataset": "val_8spk",
+        "FA": 0.005254865988300909,
+        "MISS": 0.005358144203146383,
+        "CER": 0.14187926917518492,
+        "DER": 0.1524922793666322,
+        "Spk_Count_Acc": 0.0
+      },
+      "alimeeting": {
+        "dataset": "alimeeting",
+        "FA": 0.01117450590741246,
+        "MISS": 0.03678244819426651,
+        "CER": 0.014447856425778621,
+        "DER": 0.06240481052745758,
+        "Spk_Count_Acc": 0.75
+      },
+      "ami_ihm_test": {
+        "dataset": "ami_ihm_test",
+        "FA": 0.016177070296807965,
+        "MISS": 0.07224728263307563,
+        "CER": 0.013492671162925981,
+        "DER": 0.10191702409280956,
+        "Spk_Count_Acc": 0.375
+      },
+      "ami_sdm_test": {
+        "dataset": "ami_sdm_test",
+        "FA": 0.02443425325458506,
+        "MISS": 0.07743723381366115,
+        "CER": 0.08921532596807241,
+        "DER": 0.19108681303631864,
+        "Spk_Count_Acc": 0.4375
+      },
+      "callhome_eng": {
+        "dataset": "callhome_eng",
+        "FA": 0.06027487225350145,
+        "MISS": 0.012989766710112175,
+        "CER": 0.004664548453848944,
+        "DER": 0.07792918741746256,
+        "Spk_Count_Acc": 0.85
+      },
+      "callhome_deu": {
+        "dataset": "callhome_deu",
+        "FA": 0.04013009765244858,
+        "MISS": 0.026435296349487762,
+        "CER": 0.008113437502143078,
+        "DER": 0.07467883150407942,
+        "Spk_Count_Acc": 0.8416666666666667
+      },
+      "callhome_jpn": {
+        "dataset": "callhome_jpn",
+        "FA": 0.047116633907990375,
+        "MISS": 0.04205261564764055,
+        "CER": 0.019168249802073937,
+        "DER": 0.10833749935770484,
+        "Spk_Count_Acc": 0.8583333333333333
+      },
+      "callhome_spa": {
+        "dataset": "callhome_spa",
+        "FA": 0.051789617926766895,
+        "MISS": 0.07811928473260654,
+        "CER": 0.06053788672107026,
+        "DER": 0.19044678938044368,
+        "Spk_Count_Acc": 0.6714285714285714
+      },
+      "callhome_zho": {
+        "dataset": "callhome_zho",
+        "FA": 0.055088349589328706,
+        "MISS": 0.01605819078050477,
+        "CER": 0.02184646993502622,
+        "DER": 0.0929930103048597,
+        "Spk_Count_Acc": 0.7214285714285714
+      },
+      "kdomainconf_test30": {
+        "dataset": "kdomainconf_test30",
+        "FA": 0.06388163898612645,
+        "MISS": 0.03646953476591835,
+        "CER": 0.10903669593475109,
+        "DER": 0.20938786968679587,
+        "Spk_Count_Acc": 0.26666666666666666
+      },
+      "kdomainconf_val_3_4spk_test30": {
+        "dataset": "kdomainconf_val_3_4spk_test30",
+        "FA": 0.07219335863796865,
+        "MISS": 0.040262551293458466,
+        "CER": 0.11791411512490858,
+        "DER": 0.23037002505633572,
+        "Spk_Count_Acc": 0.26666666666666666
+      },
+      "kaddress_test30": {
+        "dataset": "kaddress_test30",
+        "FA": 0.0,
+        "MISS": 0.07300147642151976,
+        "CER": 0.0,
+        "DER": 0.07300147642151976,
+        "Spk_Count_Acc": 0.9333333333333333
+      },
+      "kemergency_test30": {
+        "dataset": "kemergency_test30",
+        "FA": 0.1694700636417934,
+        "MISS": 0.11235474635964825,
+        "CER": 0.0532465553106914,
+        "DER": 0.33507136531213305,
+        "Spk_Count_Acc": 1.0
+      }
+    }
+  },
+  "sortformer_6spk_splitlr_1e5_1e4_v2": {
+    "model": "/home/devsy/workspace/streaming_sortformer_diar_train/sortformer_6spk_splitlr_1e5_1e4_v2/checkpoints/sortformer_6spk_splitlr_1e5_1e4_v2.nemo",
+    "dataset_order": [
+      "val_2spk",
+      "val_3spk",
+      "val_4spk",
+      "val_5spk",
+      "val_6spk",
+      "val_7spk",
+      "val_8spk",
+      "alimeeting",
+      "ami_ihm_test",
+      "ami_sdm_test",
+      "callhome_eng",
+      "callhome_deu",
+      "callhome_jpn",
+      "callhome_spa",
+      "callhome_zho",
+      "kdomainconf_test30",
+      "kdomainconf_val_3_4spk_test30",
+      "kaddress_test30",
+      "kemergency_test30"
+    ],
+    "results": {
+      "val_2spk": {
+        "dataset": "val_2spk",
+        "FA": 1.0543922753112905e-05,
+        "MISS": 0.0,
+        "CER": 3.439954798203289e-05,
+        "DER": 4.4943470735145796e-05,
+        "Spk_Count_Acc": 0.99
+      },
+      "val_3spk": {
+        "dataset": "val_3spk",
+        "FA": 0.00015296923011266623,
+        "MISS": 1.613712017753434e-05,
+        "CER": 0.004671762973711163,
+        "DER": 0.004840869324001363,
+        "Spk_Count_Acc": 0.99
+      },
+      "val_4spk": {
+        "dataset": "val_4spk",
+        "FA": 0.0010201999591919998,
+        "MISS": 1.9886938775672364e-05,
+        "CER": 0.007711757118430301,
+        "DER": 0.008751844016397973,
+        "Spk_Count_Acc": 0.98
+      },
+      "val_5spk": {
+        "dataset": "val_5spk",
+        "FA": 0.0024645590554014407,
+        "MISS": 0.0008609674968614908,
+        "CER": 0.020491533249437057,
+        "DER": 0.02381705980169999,
+        "Spk_Count_Acc": 0.81
+      },
+      "val_6spk": {
+        "dataset": "val_6spk",
+        "FA": 0.002499140587685902,
+        "MISS": 0.0005701528891971627,
+        "CER": 0.03914661117753175,
+        "DER": 0.04221590465441481,
+        "Spk_Count_Acc": 0.69
+      },
+      "val_7spk": {
+        "dataset": "val_7spk",
+        "FA": 0.004166449462039688,
+        "MISS": 0.007073435368995294,
+        "CER": 0.08241454765873621,
+        "DER": 0.09365443248977119,
+        "Spk_Count_Acc": 0.0
+      },
+      "val_8spk": {
+        "dataset": "val_8spk",
+        "FA": 0.00582019685297194,
+        "MISS": 0.0165610138352905,
+        "CER": 0.12252469698993289,
+        "DER": 0.14490590767819533,
+        "Spk_Count_Acc": 0.0
+      },
+      "alimeeting": {
+        "dataset": "alimeeting",
+        "FA": 0.010938635149480956,
+        "MISS": 0.03756010069312334,
+        "CER": 0.014295072601499929,
+        "DER": 0.06279380844410423,
+        "Spk_Count_Acc": 0.8
+      },
+      "ami_ihm_test": {
+        "dataset": "ami_ihm_test",
+        "FA": 0.016667566685925044,
+        "MISS": 0.074347233524188,
+        "CER": 0.044748167557967615,
+        "DER": 0.13576296776808064,
+        "Spk_Count_Acc": 0.4375
+      },
+      "ami_sdm_test": {
+        "dataset": "ami_sdm_test",
+        "FA": 0.02255987145355012,
+        "MISS": 0.07469976457866104,
+        "CER": 0.050868157448409675,
+        "DER": 0.14812779348062083,
+        "Spk_Count_Acc": 0.5
+      },
+      "callhome_eng": {
+        "dataset": "callhome_eng",
+        "FA": 0.05855339893029609,
+        "MISS": 0.013151098965599593,
+        "CER": 0.007207760835377963,
+        "DER": 0.07891225873127365,
+        "Spk_Count_Acc": 0.8285714285714286
+      },
+      "callhome_deu": {
+        "dataset": "callhome_deu",
+        "FA": 0.03802202341733555,
+        "MISS": 0.02737248921121363,
+        "CER": 0.011397625098550529,
+        "DER": 0.07679213772709971,
+        "Spk_Count_Acc": 0.8
+      },
+      "callhome_jpn": {
+        "dataset": "callhome_jpn",
+        "FA": 0.043285452759729275,
+        "MISS": 0.04661008902928864,
+        "CER": 0.02065742806394761,
+        "DER": 0.11055296985296552,
+        "Spk_Count_Acc": 0.875
+      },
+      "callhome_spa": {
+        "dataset": "callhome_spa",
+        "FA": 0.050643430068577015,
+        "MISS": 0.08394937987047742,
+        "CER": 0.059210617964313116,
+        "DER": 0.19380342790336755,
+        "Spk_Count_Acc": 0.65
+      },
+      "callhome_zho": {
+        "dataset": "callhome_zho",
+        "FA": 0.051529706903081486,
+        "MISS": 0.01702285473953175,
+        "CER": 0.023817608365520073,
+        "DER": 0.0923701700081333,
+        "Spk_Count_Acc": 0.7214285714285714
+      },
+      "kdomainconf_test30": {
+        "dataset": "kdomainconf_test30",
+        "FA": 0.06678085679539324,
+        "MISS": 0.03311869849213084,
+        "CER": 0.095622667356267,
+        "DER": 0.1955222226437911,
+        "Spk_Count_Acc": 0.3333333333333333
+      },
+      "kdomainconf_val_3_4spk_test30": {
+        "dataset": "kdomainconf_val_3_4spk_test30",
+        "FA": 0.07755577102059596,
+        "MISS": 0.032930154946559584,
+        "CER": 0.109000431384843,
+        "DER": 0.21948635735199856,
+        "Spk_Count_Acc": 0.36666666666666664
+      },
+      "kaddress_test30": {
+        "dataset": "kaddress_test30",
+        "FA": 0.0,
+        "MISS": 0.07044558230121853,
+        "CER": 0.0,
+        "DER": 0.07044558230121853,
+        "Spk_Count_Acc": 0.9333333333333333
+      },
+      "kemergency_test30": {
+        "dataset": "kemergency_test30",
+        "FA": 0.16415875435091545,
+        "MISS": 0.11269664078429757,
+        "CER": 0.03575227071447697,
+        "DER": 0.31260766584969,
+        "Spk_Count_Acc": 0.9666666666666667
+      }
+    }
+  },
+  "sortformer_6spk_v2_expanded_L16-17": {
+    "model": "sortformer_6spk_v2_expanded_L16-17.nemo",
+    "dataset_order": [
+      "val_2spk",
+      "val_3spk",
+      "val_4spk",
+      "val_5spk",
+      "val_6spk",
+      "val_7spk",
+      "val_8spk",
+      "alimeeting",
+      "ami_ihm_test",
+      "ami_sdm_test",
+      "callhome_eng",
+      "callhome_deu",
+      "callhome_jpn",
+      "callhome_spa",
+      "callhome_zho",
+      "kdomainconf_test30",
+      "kdomainconf_val_3_4spk_test30",
+      "kaddress_test30",
+      "kemergency_test30"
+    ],
+    "results": {
+      "val_2spk": {
+        "dataset": "val_2spk",
+        "FA": 1.0543922753114779e-05,
+        "MISS": 1.0543922753112905e-05,
+        "CER": 0.0002452780030442938,
+        "DER": 0.0002663658485505215,
+        "Spk_Count_Acc": 0.99
+      },
+      "val_3spk": {
+        "dataset": "val_3spk",
+        "FA": 0.0008934096534653462,
+        "MISS": 5.467949812222176e-06,
+        "CER": 0.005380595979856605,
+        "DER": 0.006279473583134173,
+        "Spk_Count_Acc": 0.98
+      },
+      "val_4spk": {
+        "dataset": "val_4spk",
+        "FA": 2.121273469405027e-05,
+        "MISS": 0.0012166829142956465,
+        "CER": 0.009487263012322346,
+        "DER": 0.010725158661312042,
+        "Spk_Count_Acc": 0.97
+      },
+      "val_5spk": {
+        "dataset": "val_5spk",
+        "FA": 0.001946331378850535,
+        "MISS": 0.00338976651118992,
+        "CER": 0.017594653208120738,
+        "DER": 0.022930751098161194,
+        "Spk_Count_Acc": 0.82
+      },
+      "val_6spk": {
+        "dataset": "val_6spk",
+        "FA": 0.0004681135215218118,
+        "MISS": 0.01038279086416824,
+        "CER": 0.03984428158707847,
+        "DER": 0.05069518597276852,
+        "Spk_Count_Acc": 0.59
+      },
+      "val_7spk": {
+        "dataset": "val_7spk",
+        "FA": 0.0008300651613880839,
+        "MISS": 0.042418184573420226,
+        "CER": 0.06377038945294741,
+        "DER": 0.10701863918775574,
+        "Spk_Count_Acc": 0.0
+      },
+      "val_8spk": {
+        "dataset": "val_8spk",
+        "FA": 0.00036581613144687664,
+        "MISS": 0.05134511659523649,
+        "CER": 0.10726393240722501,
+        "DER": 0.15897486513390838,
+        "Spk_Count_Acc": 0.0
+      },
+      "alimeeting": {
+        "dataset": "alimeeting",
+        "FA": 0.009235353009601141,
+        "MISS": 0.04958229932445482,
+        "CER": 0.01156762383729792,
+        "DER": 0.07038527617135387,
+        "Spk_Count_Acc": 0.8
+      },
+      "ami_ihm_test": {
+        "dataset": "ami_ihm_test",
+        "FA": 0.01141938228433684,
+        "MISS": 0.11263642274677603,
+        "CER": 0.025737729422385766,
+        "DER": 0.14979353445349863,
+        "Spk_Count_Acc": 0.625
+      },
+      "ami_sdm_test": {
+        "dataset": "ami_sdm_test",
+        "FA": 0.012918803083855252,
+        "MISS": 0.129259298821234,
+        "CER": 0.0592637289473788,
+        "DER": 0.20144183085246806,
+        "Spk_Count_Acc": 0.75
+      },
+      "callhome_eng": {
+        "dataset": "callhome_eng",
+        "FA": 0.06046933254756551,
+        "MISS": 0.01327232432392841,
+        "CER": 0.004524562028159667,
+        "DER": 0.07826621889965359,
+        "Spk_Count_Acc": 0.8785714285714286
+      },
+      "callhome_deu": {
+        "dataset": "callhome_deu",
+        "FA": 0.03790525211751154,
+        "MISS": 0.028593439249752085,
+        "CER": 0.006161072229844272,
+        "DER": 0.0726597635971079,
+        "Spk_Count_Acc": 0.9166666666666666
+      },
+      "callhome_jpn": {
+        "dataset": "callhome_jpn",
+        "FA": 0.04555274523720566,
+        "MISS": 0.04754768389541458,
+        "CER": 0.016588917926785678,
+        "DER": 0.10968934705940592,
+        "Spk_Count_Acc": 0.8916666666666667
+      },
+      "callhome_spa": {
+        "dataset": "callhome_spa",
+        "FA": 0.05073018106962156,
+        "MISS": 0.08640033197224978,
+        "CER": 0.05513580851800304,
+        "DER": 0.1922663215598744,
+        "Spk_Count_Acc": 0.7
+      },
+      "callhome_zho": {
+        "dataset": "callhome_zho",
+        "FA": 0.05137473532979884,
+        "MISS": 0.01903505382001403,
+        "CER": 0.020337905744607625,
+        "DER": 0.0907476948944205,
+        "Spk_Count_Acc": 0.7571428571428571
+      },
+      "kdomainconf_test30": {
+        "dataset": "kdomainconf_test30",
+        "FA": 0.05960208850450449,
+        "MISS": 0.03992469309114746,
+        "CER": 0.0895089857746588,
+        "DER": 0.18903576737031075,
+        "Spk_Count_Acc": 0.43333333333333335
+      },
+      "kdomainconf_val_3_4spk_test30": {
+        "dataset": "kdomainconf_val_3_4spk_test30",
+        "FA": 0.06746294142252131,
+        "MISS": 0.05737627154161506,
+        "CER": 0.10431569021165628,
+        "DER": 0.22915490317579262,
+        "Spk_Count_Acc": 0.3333333333333333
+      },
+      "kaddress_test30": {
+        "dataset": "kaddress_test30",
+        "FA": 0.0,
+        "MISS": 0.07021712249158267,
+        "CER": 0.0,
+        "DER": 0.07021712249158267,
+        "Spk_Count_Acc": 0.9666666666666667
+      },
+      "kemergency_test30": {
+        "dataset": "kemergency_test30",
+        "FA": 0.16370316973204538,
+        "MISS": 0.11195023994397875,
+        "CER": 0.03227318600292464,
+        "DER": 0.30792659567894876,
+        "Spk_Count_Acc": 1.0
+      }
+    }
+  },
+  "sortformer_6spk_v2_expanded_L14-17": {
+    "model": "sortformer_6spk_v2_expanded_L14-17.nemo",
+    "dataset_order": [
+      "val_2spk",
+      "val_3spk",
+      "val_4spk",
+      "val_5spk",
+      "val_6spk",
+      "val_7spk",
+      "val_8spk",
+      "alimeeting",
+      "ami_ihm_test",
+      "ami_sdm_test",
+      "callhome_eng",
+      "callhome_deu",
+      "callhome_jpn",
+      "callhome_spa",
+      "callhome_zho",
+      "kdomainconf_test30",
+      "kdomainconf_val_3_4spk_test30",
+      "kaddress_test30",
+      "kemergency_test30"
+    ],
+    "results": {
+      "val_2spk": {
+        "dataset": "val_2spk",
+        "FA": 0.0,
+        "MISS": 0.0,
+        "CER": 1.9769855162085994e-05,
+        "DER": 1.9769855162085994e-05,
+        "Spk_Count_Acc": 1.0
+      },
+      "val_3spk": {
+        "dataset": "val_3spk",
+        "FA": 0.0,
+        "MISS": 0.0006846940081939237,
+        "CER": 0.007729813929668826,
+        "DER": 0.00841450793786275,
+        "Spk_Count_Acc": 0.97
+      },
+      "val_4spk": {
+        "dataset": "val_4spk",
+        "FA": 1.6572448979727362e-05,
+        "MISS": 0.00951099475926133,
+        "CER": 0.006850122351076328,
+        "DER": 0.01637768955931738,
+        "Spk_Count_Acc": 0.98
+      },
+      "val_5spk": {
+        "dataset": "val_5spk",
+        "FA": 0.0,
+        "MISS": 0.013989486440173731,
+        "CER": 0.022375905377961566,
+        "DER": 0.03636539181813529,
+        "Spk_Count_Acc": 0.71
+      },
+      "val_6spk": {
+        "dataset": "val_6spk",
+        "FA": 0.0011024054418291944,
+        "MISS": 0.029554150074178182,
+        "CER": 0.04113973790713069,
+        "DER": 0.07179629342313808,
+        "Spk_Count_Acc": 0.52
+      },
+      "val_7spk": {
+        "dataset": "val_7spk",
+        "FA": 7.104106682830374e-05,
+        "MISS": 0.06310677375359905,
+        "CER": 0.06397211698742235,
+        "DER": 0.1271499318078497,
+        "Spk_Count_Acc": 0.0
+      },
+      "val_8spk": {
+        "dataset": "val_8spk",
+        "FA": 1.8777857244625193e-05,
+        "MISS": 0.10421006601120995,
+        "CER": 0.09509858022968602,
+        "DER": 0.1993274240981406,
+        "Spk_Count_Acc": 0.0
+      },
+      "alimeeting": {
+        "dataset": "alimeeting",
+        "FA": 0.010625170808882263,
+        "MISS": 0.053550902076898436,
+        "CER": 0.011747531082066465,
+        "DER": 0.07592360396784717,
+        "Spk_Count_Acc": 0.9
+      },
+      "ami_ihm_test": {
+        "dataset": "ami_ihm_test",
+        "FA": 0.012223897932060537,
+        "MISS": 0.10861469092125486,
+        "CER": 0.031781965340737926,
+        "DER": 0.15262055419405332,
+        "Spk_Count_Acc": 0.875
+      },
+      "ami_sdm_test": {
+        "dataset": "ami_sdm_test",
+        "FA": 0.013901488688281284,
+        "MISS": 0.1214071245298808,
+        "CER": 0.04211159076400792,
+        "DER": 0.17742020398217,
+        "Spk_Count_Acc": 0.875
+      },
+      "callhome_eng": {
+        "dataset": "callhome_eng",
+        "FA": 0.06189597063537544,
+        "MISS": 0.013318268476258832,
+        "CER": 0.004803500974563111,
+        "DER": 0.08001774008619739,
+        "Spk_Count_Acc": 0.9
+      },
+      "callhome_deu": {
+        "dataset": "callhome_deu",
+        "FA": 0.039986791210768854,
+        "MISS": 0.028404149679294742,
+        "CER": 0.007994727656998877,
+        "DER": 0.07638566854706247,
+        "Spk_Count_Acc": 0.9083333333333333
+      },
+      "callhome_jpn": {
+        "dataset": "callhome_jpn",
+        "FA": 0.04706679620470192,
+        "MISS": 0.04715814225438684,
+        "CER": 0.01981639374794315,
+        "DER": 0.11404133220703193,
+        "Spk_Count_Acc": 0.8833333333333333
+      },
+      "callhome_spa": {
+        "dataset": "callhome_spa",
+        "FA": 0.05163160539800528,
+        "MISS": 0.09078443336455114,
+        "CER": 0.05522322287978963,
+        "DER": 0.19763926164234605,
+        "Spk_Count_Acc": 0.6928571428571428
+      },
+      "callhome_zho": {
+        "dataset": "callhome_zho",
+        "FA": 0.052670429476447525,
+        "MISS": 0.021806045531966172,
+        "CER": 0.031209479733842478,
+        "DER": 0.10568595474225617,
+        "Spk_Count_Acc": 0.7285714285714285
+      },
+      "kdomainconf_test30": {
+        "dataset": "kdomainconf_test30",
+        "FA": 0.05534744950972385,
+        "MISS": 0.0506006547211341,
+        "CER": 0.09781907171512814,
+        "DER": 0.2037671759459861,
+        "Spk_Count_Acc": 0.16666666666666666
+      },
+      "kdomainconf_val_3_4spk_test30": {
+        "dataset": "kdomainconf_val_3_4spk_test30",
+        "FA": 0.06435089268831243,
+        "MISS": 0.07108260405829106,
+        "CER": 0.101488420959573,
+        "DER": 0.23692191770617652,
+        "Spk_Count_Acc": 0.36666666666666664
+      },
+      "kaddress_test30": {
+        "dataset": "kaddress_test30",
+        "FA": 0.0,
+        "MISS": 0.07091106916335162,
+        "CER": 9.423967147479225e-05,
+        "DER": 0.0710053088348264,
+        "Spk_Count_Acc": 0.8666666666666667
+      },
+      "kemergency_test30": {
+        "dataset": "kemergency_test30",
+        "FA": 0.16546866311041536,
+        "MISS": 0.11223281774555642,
+        "CER": 0.03195353531192717,
+        "DER": 0.3096550161678989,
+        "Spk_Count_Acc": 1.0
+      }
+    }
+  },
+  "sortformer_6spk_v2_expanded_L8-9": {
+    "model": "sortformer_6spk_v2_expanded_L8-9.nemo",
+    "dataset_order": [
+      "val_2spk",
+      "val_3spk",
+      "val_4spk",
+      "val_5spk",
+      "val_6spk",
+      "val_7spk",
+      "val_8spk",
+      "alimeeting",
+      "ami_ihm_test",
+      "ami_sdm_test",
+      "callhome_eng",
+      "callhome_deu",
+      "callhome_jpn",
+      "callhome_spa",
+      "callhome_zho",
+      "kdomainconf_test30",
+      "kdomainconf_val_3_4spk_test30",
+      "kaddress_test30",
+      "kemergency_test30"
+    ],
+    "results": {
+      "val_2spk": {
+        "dataset": "val_2spk",
+        "FA": 1.0543922753112905e-05,
+        "MISS": 0.0,
+        "CER": 9.225932408974963e-06,
+        "DER": 1.9769855162087868e-05,
+        "Spk_Count_Acc": 1.0
+      },
+      "val_3spk": {
+        "dataset": "val_3spk",
+        "FA": 0.00032754353021509087,
+        "MISS": 5.467949812222176e-06,
+        "CER": 0.003978266899965857,
+        "DER": 0.00431127837999317,
+        "Spk_Count_Acc": 0.99
+      },
+      "val_4spk": {
+        "dataset": "val_4spk",
+        "FA": 0.0015672233551148342,
+        "MISS": 1.9886938775672364e-05,
+        "CER": 0.00703175639189414,
+        "DER": 0.008618866685784645,
+        "Spk_Count_Acc": 0.97
+      },
+      "val_5spk": {
+        "dataset": "val_5spk",
+        "FA": 0.0031053114662371504,
+        "MISS": 0.0005055570732122674,
+        "CER": 0.02138227666414437,
+        "DER": 0.024993145203593786,
+        "Spk_Count_Acc": 0.75
+      },
+      "val_6spk": {
+        "dataset": "val_6spk",
+        "FA": 0.003902213582466559,
+        "MISS": 0.004460958343600649,
+        "CER": 0.035931673932376645,
+        "DER": 0.04429484585844385,
+        "Spk_Count_Acc": 0.71
+      },
+      "val_7spk": {
+        "dataset": "val_7spk",
+        "FA": 0.0069526898014850595,
+        "MISS": 0.014751568419457507,
+        "CER": 0.08263991513865739,
+        "DER": 0.10434417335959996,
+        "Spk_Count_Acc": 0.0
+      },
+      "val_8spk": {
+        "dataset": "val_8spk",
+        "FA": 0.00429754735364831,
+        "MISS": 0.025076537372513037,
+        "CER": 0.12225934239474481,
+        "DER": 0.15163342712090616,
+        "Spk_Count_Acc": 0.0
+      },
+      "alimeeting": {
+        "dataset": "alimeeting",
+        "FA": 0.011814481297199924,
+        "MISS": 0.040235362622964836,
+        "CER": 0.012730154239562197,
+        "DER": 0.06477999815972696,
+        "Spk_Count_Acc": 0.75
+      },
+      "ami_ihm_test": {
+        "dataset": "ami_ihm_test",
+        "FA": 0.018290987004003625,
+        "MISS": 0.06997593309002899,
+        "CER": 0.029535584984022294,
+        "DER": 0.11780250507805491,
+        "Spk_Count_Acc": 0.5625
+      },
+      "ami_sdm_test": {
+        "dataset": "ami_sdm_test",
+        "FA": 0.02574238469441321,
+        "MISS": 0.07661604382794714,
+        "CER": 0.0697884525892707,
+        "DER": 0.17214688111163104,
+        "Spk_Count_Acc": 0.5625
+      },
+      "callhome_eng": {
+        "dataset": "callhome_eng",
+        "FA": 0.061968947094867013,
+        "MISS": 0.012739066293340782,
+        "CER": 0.0072876515343903644,
+        "DER": 0.08199566492259816,
+        "Spk_Count_Acc": 0.8642857142857143
+      },
+      "callhome_deu": {
+        "dataset": "callhome_deu",
+        "FA": 0.040718977693742574,
+        "MISS": 0.026786985990799976,
+        "CER": 0.012424470470191257,
+        "DER": 0.0799304341547338,
+        "Spk_Count_Acc": 0.825
+      },
+      "callhome_jpn": {
+        "dataset": "callhome_jpn",
+        "FA": 0.045325614519070384,
+        "MISS": 0.04555576780161805,
+        "CER": 0.018374607450215175,
+        "DER": 0.1092559897709036,
+        "Spk_Count_Acc": 0.8583333333333333
+      },
+      "callhome_spa": {
+        "dataset": "callhome_spa",
+        "FA": 0.05261062634919295,
+        "MISS": 0.08161428372230814,
+        "CER": 0.059697624253105604,
+        "DER": 0.1939225343246067,
+        "Spk_Count_Acc": 0.65
+      },
+      "callhome_zho": {
+        "dataset": "callhome_zho",
+        "FA": 0.05367058692483932,
+        "MISS": 0.016904558257052404,
+        "CER": 0.026725484059503524,
+        "DER": 0.09730062924139525,
+        "Spk_Count_Acc": 0.6857142857142857
+      },
+      "kdomainconf_test30": {
+        "dataset": "kdomainconf_test30",
+        "FA": 0.06482133621421192,
+        "MISS": 0.037697919017199245,
+        "CER": 0.10683736277048957,
+        "DER": 0.20935661800190072,
+        "Spk_Count_Acc": 0.16666666666666666
+      },
+      "kdomainconf_val_3_4spk_test30": {
+        "dataset": "kdomainconf_val_3_4spk_test30",
+        "FA": 0.07947584285804184,
+        "MISS": 0.03604212182406183,
+        "CER": 0.10020251349203123,
+        "DER": 0.2157204781741349,
+        "Spk_Count_Acc": 0.3333333333333333
+      },
+      "kaddress_test30": {
+        "dataset": "kaddress_test30",
+        "FA": 0.0,
+        "MISS": 0.07121377841111913,
+        "CER": 0.0,
+        "DER": 0.07121377841111913,
+        "Spk_Count_Acc": 0.9333333333333333
+      },
+      "kemergency_test30": {
+        "dataset": "kemergency_test30",
+        "FA": 0.1716672502214075,
+        "MISS": 0.11268181162852965,
+        "CER": 0.03247585113175292,
+        "DER": 0.3168249129816901,
+        "Spk_Count_Acc": 0.9666666666666667
+      }
+    }
+  },
+  "sortformer_7spk_splitlr_1e5_1e4": {
+    "model": "streaming_sortformer_diar_train/sortformer_7spk_splitlr_1e5_1e4/checkpoints/sortformer_7spk_splitlr_1e5_1e4.nemo",
+    "dataset_order": [
+      "val_2spk",
+      "val_3spk",
+      "val_4spk",
+      "val_5spk",
+      "val_6spk",
+      "val_7spk",
+      "val_8spk",
+      "alimeeting",
+      "ami_ihm_test",
+      "ami_sdm_test",
+      "callhome_eng",
+      "callhome_deu",
+      "callhome_jpn",
+      "callhome_spa",
+      "callhome_zho",
+      "kdomainconf_test30",
+      "kdomainconf_val_3_4spk_test30",
+      "kaddress_test30",
+      "kemergency_test30"
+    ],
+    "results": {
+      "val_2spk": {
+        "dataset": "val_2spk",
+        "FA": 9.225932408973089e-06,
+        "MISS": 0.0,
+        "CER": 0.00010754801208175332,
+        "DER": 0.00011677394449072641,
+        "Spk_Count_Acc": 1.0
+      },
+      "val_3spk": {
+        "dataset": "val_3spk",
+        "FA": 0.00029273536189825786,
+        "MISS": 8.37529873677004e-05,
+        "CER": 0.004082691404916353,
+        "DER": 0.004459179754182312,
+        "Spk_Count_Acc": 0.96
+      },
+      "val_4spk": {
+        "dataset": "val_4spk",
+        "FA": 0.0010217909142940529,
+        "MISS": 1.9886938775672364e-05,
+        "CER": 0.006231638555152913,
+        "DER": 0.007273316408222638,
+        "Spk_Count_Acc": 0.96
+      },
+      "val_5spk": {
+        "dataset": "val_5spk",
+        "FA": 0.0009430730064959567,
+        "MISS": 0.0013880645957494691,
+        "CER": 0.019191022522757676,
+        "DER": 0.021522160125003104,
+        "Spk_Count_Acc": 0.83
+      },
+      "val_6spk": {
+        "dataset": "val_6spk",
+        "FA": 0.0026187991753697936,
+        "MISS": 0.0017167965165154207,
+        "CER": 0.03126689036738227,
+        "DER": 0.03560248605926749,
+        "Spk_Count_Acc": 0.68
+      },
+      "val_7spk": {
+        "dataset": "val_7spk",
+        "FA": 0.00592271556296407,
+        "MISS": 0.0024318836187301116,
+        "CER": 0.05698342173056525,
+        "DER": 0.06533802091225942,
+        "Spk_Count_Acc": 0.58
+      },
+      "val_8spk": {
+        "dataset": "val_8spk",
+        "FA": 0.007014468573730182,
+        "MISS": 0.0030335628378694154,
+        "CER": 0.0941561665192213,
+        "DER": 0.1042041979308209,
+        "Spk_Count_Acc": 0.0
+      },
+      "alimeeting": {
+        "dataset": "alimeeting",
+        "FA": 0.01093932181835418,
+        "MISS": 0.0359756122683003,
+        "CER": 0.017861287394270144,
+        "DER": 0.06477622148092463,
+        "Spk_Count_Acc": 0.85
+      },
+      "ami_ihm_test": {
+        "dataset": "ami_ihm_test",
+        "FA": 0.018344734235598213,
+        "MISS": 0.06883200579081976,
+        "CER": 0.06287833607373645,
+        "DER": 0.15005507610015442,
+        "Spk_Count_Acc": 0.375
+      },
+      "ami_sdm_test": {
+        "dataset": "ami_sdm_test",
+        "FA": 0.023642433803301305,
+        "MISS": 0.08187861725216693,
+        "CER": 0.07351520945084535,
+        "DER": 0.17903626050631358,
+        "Spk_Count_Acc": 0.5625
+      },
+      "callhome_eng": {
+        "dataset": "callhome_eng",
+        "FA": 0.06716884292894074,
+        "MISS": 0.012210891628880659,
+        "CER": 0.006544790809790977,
+        "DER": 0.08592452536761237,
+        "Spk_Count_Acc": 0.9142857142857143
+      },
+      "callhome_deu": {
+        "dataset": "callhome_deu",
+        "FA": 0.04456388431286803,
+        "MISS": 0.02506188910157538,
+        "CER": 0.007599910593456053,
+        "DER": 0.07722568400789946,
+        "Spk_Count_Acc": 0.9
+      },
+      "callhome_jpn": {
+        "dataset": "callhome_jpn",
+        "FA": 0.053189727221867975,
+        "MISS": 0.04071050475648959,
+        "CER": 0.018226409501964223,
+        "DER": 0.1121266414803218,
+        "Spk_Count_Acc": 0.9
+      },
+      "callhome_spa": {
+        "dataset": "callhome_spa",
+        "FA": 0.05332436933962581,
+        "MISS": 0.12073177114532016,
+        "CER": 0.03701659078483141,
+        "DER": 0.21107273126977735,
+        "Spk_Count_Acc": 0.6785714285714286
+      },
+      "callhome_zho": {
+        "dataset": "callhome_zho",
+        "FA": 0.061368493065737835,
+        "MISS": 0.01465349390115282,
+        "CER": 0.03166728212195443,
+        "DER": 0.1076892690888451,
+        "Spk_Count_Acc": 0.75
+      },
+      "kdomainconf_test30": {
+        "dataset": "kdomainconf_test30",
+        "FA": 0.07321961913548222,
+        "MISS": 0.029899175874098453,
+        "CER": 0.08691849068007511,
+        "DER": 0.1900372856896558,
+        "Spk_Count_Acc": 0.16666666666666666
+      },
+      "kdomainconf_val_3_4spk_test30": {
+        "dataset": "kdomainconf_val_3_4spk_test30",
+        "FA": 0.08395983045838809,
+        "MISS": 0.03309554642216592,
+        "CER": 0.10850941393053766,
+        "DER": 0.22556479081109165,
+        "Spk_Count_Acc": 0.26666666666666666
+      },
+      "kaddress_test30": {
+        "dataset": "kaddress_test30",
+        "FA": 0.0,
+        "MISS": 0.07805900545733371,
+        "CER": 0.019901705166904173,
+        "DER": 0.09796071062423789,
+        "Spk_Count_Acc": 0.9333333333333333
+      },
+      "kemergency_test30": {
+        "dataset": "kemergency_test30",
+        "FA": 0.18267954606306497,
+        "MISS": 0.111643770724775,
+        "CER": 0.03996127942660598,
+        "DER": 0.33428459621444595,
+        "Spk_Count_Acc": 0.9666666666666667
+      }
+    }
+  },
+  "sortformer_6spk_v2_expanded_L8-9_L14-17": {
+    "model": "sortformer_6spk_v2_expanded_L8-9_L14-17.nemo",
+    "dataset_order": [
+      "val_2spk",
+      "val_3spk",
+      "val_4spk",
+      "val_5spk",
+      "val_6spk",
+      "val_7spk",
+      "val_8spk",
+      "alimeeting",
+      "ami_ihm_test",
+      "ami_sdm_test",
+      "callhome_eng",
+      "callhome_deu",
+      "callhome_jpn",
+      "callhome_spa",
+      "callhome_zho",
+      "kdomainconf_test30",
+      "kdomainconf_val_3_4spk_test30",
+      "kaddress_test30",
+      "kemergency_test30"
+    ],
+    "results": {
+      "val_2spk": {
+        "dataset": "val_2spk",
+        "FA": 0.0,
+        "MISS": 0.0,
+        "CER": 1.9769855162085994e-05,
+        "DER": 1.9769855162085994e-05,
+        "Spk_Count_Acc": 1.0
+      },
+      "val_3spk": {
+        "dataset": "val_3spk",
+        "FA": 0.0,
+        "MISS": 0.0005282572977125296,
+        "CER": 0.007816767668146122,
+        "DER": 0.008345024965858653,
+        "Spk_Count_Acc": 0.96
+      },
+      "val_4spk": {
+        "dataset": "val_4spk",
+        "FA": 5.30318367351278e-05,
+        "MISS": 0.015301408432777979,
+        "CER": 0.006512707289849078,
+        "DER": 0.021867147559362185,
+        "Spk_Count_Acc": 0.97
+      },
+      "val_5spk": {
+        "dataset": "val_5spk",
+        "FA": 0.00020957177922132427,
+        "MISS": 0.017920794538057686,
+        "CER": 0.01978692099777453,
+        "DER": 0.03791728731505354,
+        "Spk_Count_Acc": 0.68
+      },
+      "val_6spk": {
+        "dataset": "val_6spk",
+        "FA": 8.11244662263646e-05,
+        "MISS": 0.048174243184784284,
+        "CER": 0.04192170170736576,
+        "DER": 0.09017706935837641,
+        "Spk_Count_Acc": 0.5
+      },
+      "val_7spk": {
+        "dataset": "val_7spk",
+        "FA": 0.0002812547355659929,
+        "MISS": 0.08729455978178516,
+        "CER": 0.06496390362176084,
+        "DER": 0.152539718139112,
+        "Spk_Count_Acc": 0.0
+      },
+      "val_8spk": {
+        "dataset": "val_8spk",
+        "FA": 9.388928622313014e-05,
+        "MISS": 0.12033203007179955,
+        "CER": 0.08791921859702648,
+        "DER": 0.20834513795504916,
+        "Spk_Count_Acc": 0.0
+      },
+      "alimeeting": {
+        "dataset": "alimeeting",
+        "FA": 0.011272356221838094,
+        "MISS": 0.05550069834224377,
+        "CER": 0.013767024238037766,
+        "DER": 0.08054007880211964,
+        "Spk_Count_Acc": 0.85
+      },
+      "ami_ihm_test": {
+        "dataset": "ami_ihm_test",
+        "FA": 0.01210497689207598,
+        "MISS": 0.12321489362026276,
+        "CER": 0.02159284449139966,
+        "DER": 0.1569127150037384,
+        "Spk_Count_Acc": 0.75
+      },
+      "ami_sdm_test": {
+        "dataset": "ami_sdm_test",
+        "FA": 0.013596779973730651,
+        "MISS": 0.13633361947738704,
+        "CER": 0.05762676601976433,
+        "DER": 0.20755716547088204,
+        "Spk_Count_Acc": 0.8125
+      },
+      "callhome_eng": {
+        "dataset": "callhome_eng",
+        "FA": 0.0643976114210312,
+        "MISS": 0.013398180714958182,
+        "CER": 0.005183719529151034,
+        "DER": 0.08297951166514042,
+        "Spk_Count_Acc": 0.9071428571428571
+      },
+      "callhome_deu": {
+        "dataset": "callhome_deu",
+        "FA": 0.04284866775140431,
+        "MISS": 0.027475107045743026,
+        "CER": 0.008582440402186047,
+        "DER": 0.07890621519933338,
+        "Spk_Count_Acc": 0.9
+      },
+      "callhome_jpn": {
+        "dataset": "callhome_jpn",
+        "FA": 0.04918538312769002,
+        "MISS": 0.04613141634761114,
+        "CER": 0.020322846334601862,
+        "DER": 0.115639645809903,
+        "Spk_Count_Acc": 0.8833333333333333
+      },
+      "callhome_spa": {
+        "dataset": "callhome_spa",
+        "FA": 0.05335523219815073,
+        "MISS": 0.08640263715082849,
+        "CER": 0.054237949753607934,
+        "DER": 0.19399581910258715,
+        "Spk_Count_Acc": 0.6928571428571428
+      },
+      "callhome_zho": {
+        "dataset": "callhome_zho",
+        "FA": 0.055746297082641894,
+        "MISS": 0.02020958837300548,
+        "CER": 0.027290130485383046,
+        "DER": 0.10324601594103043,
+        "Spk_Count_Acc": 0.7428571428571429
+      },
+      "kdomainconf_test30": {
+        "dataset": "kdomainconf_test30",
+        "FA": 0.05372292768712844,
+        "MISS": 0.06866923735904266,
+        "CER": 0.08586239007827187,
+        "DER": 0.20825455512444296,
+        "Spk_Count_Acc": 0.1
+      },
+      "kdomainconf_val_3_4spk_test30": {
+        "dataset": "kdomainconf_val_3_4spk_test30",
+        "FA": 0.06506957410774047,
+        "MISS": 0.09295911584934027,
+        "CER": 0.09962804312538709,
+        "DER": 0.25765673308246784,
+        "Spk_Count_Acc": 0.4
+      },
+      "kaddress_test30": {
+        "dataset": "kaddress_test30",
+        "FA": 0.0,
+        "MISS": 0.07136798878262335,
+        "CER": 9.423967147479225e-05,
+        "DER": 0.07146222845409815,
+        "Spk_Count_Acc": 0.8666666666666667
+      },
+      "kemergency_test30": {
+        "dataset": "kemergency_test30",
+        "FA": 0.16421395176405162,
+        "MISS": 0.11670380820958541,
+        "CER": 0.03165283298663318,
+        "DER": 0.31257059296027023,
+        "Spk_Count_Acc": 0.9666666666666667
+      }
+    }
+  }
+}
