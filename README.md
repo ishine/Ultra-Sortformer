@@ -264,9 +264,6 @@ Based on the layer repeat findings, we permanently duplicated specific Transform
 - **L8-9** is the most balanced: smallest DER degradation on synthetic val, and AMI IHM DER actually *improves* (13.58% → 11.78%)
 - **L14-17** dramatically boosts Spk_Count_Acc on real-world data (AMI IHM: 43.75% → 87.50%), confirming this block drives speaker count judgment — at the cost of higher DER without fine-tuning
 - **Combined L8-9+L14-17** gives the best Spk_Count_Acc on CallHome but degrades synthetic val DER the most
-- All expanded models require **fine-tuning** to recover DER, particularly the untrained junction between original and duplicated layers
-
-**Recommended next step**: Fine-tune `expanded_L8-9` as it shows the least raw degradation and has already demonstrated AMI IHM improvement pre-fine-tuning.
 
 ---
 
