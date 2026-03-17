@@ -5,12 +5,9 @@ output/
 temp/
 test/
 
-# results: 대용량 실험 로그 텍스트/json(half 분할본 등)은 제외, 평가 결과와 시각화는 포함
-results/layer_repeat_*half*.json
-results/layer_repeat_alimeeting*.json
-results/layer_repeat_conformer*.json
-results/layer_repeat_transformer*.json
-results/layer_repeat_realworld.json
+# results: JSON/MD 결과 파일 제외, 시각화 이미지만 포함
+results/*.json
+results/*.md
 results/*.txt
 
 # ===== 모델 (대용량) =====
