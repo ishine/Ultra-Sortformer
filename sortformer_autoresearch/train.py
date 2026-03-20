@@ -56,7 +56,7 @@ ATS_WEIGHT = 0.5
 
 # MISS가 큰 편일 때(기존 기준 0.20 내외) 캐시 압축 단계에서 스피치로 취급하는
 # 확률 임계값을 낮춰 더 많은 후보 스피커를 유지하도록 유도한다.
-SPEECH_PROB_THRESHOLD = 0.45
+SPEECH_PROB_THRESHOLD = 0.42
 
 N_BASE_SPKS = 4
 NUM_SPKS = 8
