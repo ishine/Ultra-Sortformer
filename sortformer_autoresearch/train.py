@@ -58,7 +58,7 @@ ATS_WEIGHT = 0.5
 # 그래서 base 스피커(1-4)는 기존 임계값을 유지하고, 새 스피커(5-8)에서만 더 민감하게
 # 캐시 압축 후보를 늘린다.
 BASE_SPEECH_PROB_THRESHOLD = 0.55
-NEW_SPEECH_PROB_THRESHOLD = 0.43
+NEW_SPEECH_PROB_THRESHOLD = 0.44
 
 N_BASE_SPKS = 4
 NUM_SPKS = 8
