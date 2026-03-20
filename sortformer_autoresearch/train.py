@@ -54,6 +54,10 @@ FREEZE_TRANSFORMER = False
 PIL_WEIGHT = 0.5
 ATS_WEIGHT = 0.5
 
+# MISS가 큰 편일 때(기존 기준 0.20 내외) 캐시 압축 단계에서 스피치로 취급하는
+# 확률 임계값을 낮춰 더 많은 후보 스피커를 유지하도록 유도한다.
+SPEECH_PROB_THRESHOLD = 0.45
+
 N_BASE_SPKS = 4
 NUM_SPKS = 8
 
@@ -299,6 +303,7 @@ class SortformerModules(nn.Module):
         n_base_spks=0,
         causal_attn_rate=0.0,
         causal_attn_rc=7,
+        speech_prob_threshold=0.5,
         log=False,
     ):
         super().__init__()
@@ -339,6 +344,7 @@ class SortformerModules(nn.Module):
         self.strong_boost_rate = strong_boost_rate
         self.weak_boost_rate = weak_boost_rate
         self.min_pos_scores_rate = min_pos_scores_rate
+        self.speech_prob_threshold = speech_prob_threshold
         self.log = log
 
     def _check_streaming_parameters(self):
@@ -616,7 +622,9 @@ class SortformerModules(nn.Module):
         return scores
 
     def _disable_low_scores(self, preds, scores, min_pos_scores_per_spk):
-        is_speech = preds > 0.5
+        # NeMo 원본은 0.5로 하드 임계값을 두지만, 4→8 확장 시에는
+        # 새 스피커 초기 단계에서 확률이 덜 날카로울 수 있다.
+        is_speech = preds > self.speech_prob_threshold
         scores = torch.where(is_speech, scores, torch.tensor(float('-inf'), device=scores.device))
         is_pos = scores > 0
         is_nonpos_replace = (~is_pos) * is_speech * (is_pos.sum(dim=1).unsqueeze(1) >= min_pos_scores_per_spk)
@@ -880,6 +888,7 @@ def build_custom_modules(nemo_model, src_spks=SRC_NUM_SPKS, dst_spks=NUM_SPKS):
         weak_boost_rate=sm_cfg.get("weak_boost_rate", 1.5),
         min_pos_scores_rate=sm_cfg.get("min_pos_scores_rate", 0.5),
         n_base_spks=N_BASE_SPKS,
+        speech_prob_threshold=SPEECH_PROB_THRESHOLD,
     )
 
     src_state = nemo_model.sortformer_modules.state_dict()
