@@ -51,14 +51,14 @@ ADAM_EPS = 1e-9
 FREEZE_ENCODER = True
 FREEZE_TRANSFORMER = False
 
-PIL_WEIGHT = 0.5
-ATS_WEIGHT = 0.5
+PIL_WEIGHT = 0.55
+ATS_WEIGHT = 0.45
 
-# exp2에서 MISS는 줄었지만 FA/CER가 같이 올랐다.
-# 그래서 base 스피커(1-4)는 기존 임계값을 유지하고, 새 스피커(5-8)에서만 더 민감하게
-# 캐시 압축 후보를 늘린다.
 BASE_SPEECH_PROB_THRESHOLD = 0.54
-NEW_SPEECH_PROB_THRESHOLD = 0.435
+NEW_SPEECH_PROB_THRESHOLD = 0.44
+
+FOCAL_GAMMA = 2.0
+NEW_SPK_INIT_NOISE = 0.05
 
 N_BASE_SPKS = 4
 NUM_SPKS = 8
@@ -179,6 +179,8 @@ class TransformerEncoderBlock(nn.Module):
         )
         self.layer_norm_2 = nn.LayerNorm(hidden_size, eps=1e-5)
         self.second_sub_layer = PositionWiseFF(hidden_size, inner_size, ffn_dropout, hidden_act)
+        self.ls1 = nn.Parameter(torch.tensor(1.0))
+        self.ls2 = nn.Parameter(torch.tensor(1.0))
 
     def forward_preln(self, encoder_query, encoder_mask, encoder_keys):
         residual = encoder_query
@@ -195,13 +197,13 @@ class TransformerEncoderBlock(nn.Module):
         return output
 
     def forward_postln(self, encoder_query, encoder_mask, encoder_keys):
-        self_attn_output, _ = self.first_sub_layer(
+        attn_out, _ = self.first_sub_layer(
             encoder_query, encoder_keys, encoder_keys, encoder_mask
         )
-        self_attn_output += encoder_query
+        self_attn_output = encoder_query + self.ls1 * attn_out
         self_attn_output = self.layer_norm_1(self_attn_output)
-        output = self.second_sub_layer(self_attn_output)
-        output += self_attn_output
+        ffn_out = self.second_sub_layer(self_attn_output)
+        output = self_attn_output + self.ls2 * ffn_out
         output = self.layer_norm_2(output)
         return output
 
@@ -766,6 +768,26 @@ class BCELoss(nn.Module):
         return self.loss_f(probs_cat, labels_cat)
 
 
+class FocalBCELoss(nn.Module):
+    """Focal loss on frame-wise BCE — down-weights easy frames, focuses on hard negatives/positives."""
+
+    def __init__(self, gamma=2.0):
+        super().__init__()
+        self.gamma = gamma
+
+    def forward(self, probs, labels, target_lens):
+        eps = 1e-7
+        probs_list = [probs[k, :target_lens[k], :] for k in range(probs.shape[0])]
+        labels_list = [labels[k, :target_lens[k], :] for k in range(labels.shape[0])]
+        p = torch.cat(probs_list, dim=0)
+        y = torch.cat(labels_list, dim=0)
+        bce = -(y * torch.log(p + eps) + (1.0 - y) * torch.log(1.0 - p + eps))
+        pt = p * y + (1.0 - p) * (1.0 - y)
+        pt = pt.clamp(min=eps, max=1.0 - eps)
+        w = (1.0 - pt).pow(self.gamma)
+        return (w * bce).mean()
+
+
 # ===================================================================
 # MODEL EXPANSION — agent can completely replace this section
 # ===================================================================
@@ -810,7 +832,10 @@ def init_new_speaker_weights(existing_weight, n_new_rows):
         if current_norm > 1e-6:
             new_vec = new_vec * (avg_norm / current_norm)
         new_rows.append(new_vec)
-    return torch.cat(new_rows, dim=0).to(existing_weight.dtype)
+    out = torch.cat(new_rows, dim=0).to(existing_weight.dtype)
+    noise = torch.randn_like(out, dtype=torch.float32) * (avg_std * NEW_SPK_INIT_NOISE)
+    out = (out.float() + noise).to(out.dtype)
+    return out
 
 
 def init_new_speaker_bias(existing_bias, n_new):
@@ -924,7 +949,7 @@ def build_custom_modules(nemo_model, src_spks=SRC_NUM_SPKS, dst_spks=NUM_SPKS):
         attn_score_dropout=tf_cfg.get("attn_score_dropout", 0.0),
         attn_layer_dropout=tf_cfg.get("attn_layer_dropout", 0.0),
         ffn_dropout=tf_cfg.get("ffn_dropout", 0.0),
-        hidden_act=tf_cfg.get("hidden_act", "relu"),
+        hidden_act="gelu",
         pre_ln=tf_cfg.get("pre_ln", False),
         pre_ln_final_layer_norm=tf_cfg.get("pre_ln_final_layer_norm", True),
     )
@@ -936,7 +961,7 @@ def build_custom_modules(nemo_model, src_spks=SRC_NUM_SPKS, dst_spks=NUM_SPKS):
     if unexpected:
         print(f"  TransformerEncoder unexpected keys: {unexpected}")
 
-    custom_loss = BCELoss()
+    custom_loss = FocalBCELoss(gamma=FOCAL_GAMMA)
 
     return custom_sm, custom_tf, custom_loss
 
