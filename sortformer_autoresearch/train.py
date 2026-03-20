@@ -54,9 +54,11 @@ FREEZE_TRANSFORMER = False
 PIL_WEIGHT = 0.5
 ATS_WEIGHT = 0.5
 
-# MISS가 큰 편일 때(기존 기준 0.20 내외) 캐시 압축 단계에서 스피치로 취급하는
-# 확률 임계값을 낮춰 더 많은 후보 스피커를 유지하도록 유도한다.
-SPEECH_PROB_THRESHOLD = 0.42
+# exp2에서 MISS는 줄었지만 FA/CER가 같이 올랐다.
+# 그래서 base 스피커(1-4)는 기존 임계값을 유지하고, 새 스피커(5-8)에서만 더 민감하게
+# 캐시 압축 후보를 늘린다.
+BASE_SPEECH_PROB_THRESHOLD = 0.50
+NEW_SPEECH_PROB_THRESHOLD = 0.42
 
 N_BASE_SPKS = 4
 NUM_SPKS = 8
@@ -303,7 +305,8 @@ class SortformerModules(nn.Module):
         n_base_spks=0,
         causal_attn_rate=0.0,
         causal_attn_rc=7,
-        speech_prob_threshold=0.5,
+        base_speech_prob_threshold=0.5,
+        new_speech_prob_threshold=0.5,
         log=False,
     ):
         super().__init__()
@@ -344,7 +347,8 @@ class SortformerModules(nn.Module):
         self.strong_boost_rate = strong_boost_rate
         self.weak_boost_rate = weak_boost_rate
         self.min_pos_scores_rate = min_pos_scores_rate
-        self.speech_prob_threshold = speech_prob_threshold
+        self.base_speech_prob_threshold = base_speech_prob_threshold
+        self.new_speech_prob_threshold = new_speech_prob_threshold
         self.log = log
 
     def _check_streaming_parameters(self):
@@ -622,9 +626,24 @@ class SortformerModules(nn.Module):
         return scores
 
     def _disable_low_scores(self, preds, scores, min_pos_scores_per_spk):
-        # NeMo 원본은 0.5로 하드 임계값을 두지만, 4→8 확장 시에는
-        # 새 스피커 초기 단계에서 확률이 덜 날카로울 수 있다.
-        is_speech = preds > self.speech_prob_threshold
+        n_spk = preds.shape[2]
+        # base/new 스피커마다 서로 다른 임계값 적용.
+        if self.n_base_spks > 0:
+            thresh = torch.full(
+                (n_spk,),
+                float(self.new_speech_prob_threshold),
+                dtype=preds.dtype,
+                device=preds.device,
+            )
+            thresh[: self.n_base_spks] = float(self.base_speech_prob_threshold)
+        else:
+            thresh = torch.full(
+                (n_spk,),
+                float(self.new_speech_prob_threshold),
+                dtype=preds.dtype,
+                device=preds.device,
+            )
+        is_speech = preds > thresh.view(1, 1, -1)
         scores = torch.where(is_speech, scores, torch.tensor(float('-inf'), device=scores.device))
         is_pos = scores > 0
         is_nonpos_replace = (~is_pos) * is_speech * (is_pos.sum(dim=1).unsqueeze(1) >= min_pos_scores_per_spk)
@@ -888,7 +907,8 @@ def build_custom_modules(nemo_model, src_spks=SRC_NUM_SPKS, dst_spks=NUM_SPKS):
         weak_boost_rate=sm_cfg.get("weak_boost_rate", 1.5),
         min_pos_scores_rate=sm_cfg.get("min_pos_scores_rate", 0.5),
         n_base_spks=N_BASE_SPKS,
-        speech_prob_threshold=SPEECH_PROB_THRESHOLD,
+        base_speech_prob_threshold=BASE_SPEECH_PROB_THRESHOLD,
+        new_speech_prob_threshold=NEW_SPEECH_PROB_THRESHOLD,
     )
 
     src_state = nemo_model.sortformer_modules.state_dict()
