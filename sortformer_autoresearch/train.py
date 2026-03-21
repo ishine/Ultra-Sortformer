@@ -69,6 +69,9 @@ SEED = 42
 # --- Inference post-processing (diarize / eval only; training path unchanged) ---
 PP_ENABLE = True
 PP_MEDIAN_KERNEL = 7
+PP_MORPH_KERNEL = 5
+PP_MORPH_BIN_THRESH = 0.44
+PP_MORPH_FILL_PROB = 0.56
 
 # ===================================================================
 # Extracted modules — agent can modify these
@@ -995,6 +998,30 @@ def temporal_median_filter_probs(preds: torch.Tensor, kernel: int, frame_lengths
     return torch.where(m, out, torch.zeros_like(preds))
 
 
+def morph_close_gap_fill_probs(
+    preds: torch.Tensor,
+    kernel: int,
+    bin_thresh: float,
+    fill_prob: float,
+    frame_lengths: torch.Tensor,
+) -> torch.Tensor:
+    if kernel <= 1:
+        return preds
+    b, t, s = preds.shape
+    pad = kernel // 2
+    orig_bin = (preds >= bin_thresh).float()
+    x = orig_bin.permute(0, 2, 1)
+    dil = F.max_pool1d(x, kernel, stride=1, padding=pad)
+    inv = 1.0 - dil
+    inv_e = F.max_pool1d(inv, kernel, stride=1, padding=pad)
+    closed = (1.0 - inv_e).permute(0, 2, 1)
+    fill_mask = (closed > orig_bin).float()
+    boosted = torch.maximum(preds, fill_mask * fill_prob)
+    ar = torch.arange(t, device=preds.device).view(1, t).expand(b, -1)
+    m = (ar < frame_lengths.view(-1, 1)).unsqueeze(-1).expand(b, t, s)
+    return torch.where(m, boosted, torch.zeros_like(preds))
+
+
 def apply_infer_postprocess_probs(model, preds: torch.Tensor, audio_signal_length: torch.Tensor) -> torch.Tensor:
     if not PP_ENABLE:
         return preds
@@ -1002,6 +1029,9 @@ def apply_infer_postprocess_probs(model, preds: torch.Tensor, audio_signal_lengt
     max_t = preds.shape[1]
     fl = _approx_frame_lengths_from_audio(model, audio_signal_length, max_t, dev)
     out = temporal_median_filter_probs(preds, PP_MEDIAN_KERNEL, fl)
+    out = morph_close_gap_fill_probs(
+        out, PP_MORPH_KERNEL, PP_MORPH_BIN_THRESH, PP_MORPH_FILL_PROB, fl
+    )
     return out
 
 
