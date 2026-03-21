@@ -68,7 +68,7 @@ SEED = 42
 
 # --- Inference post-processing (diarize / eval only; training path unchanged) ---
 PP_ENABLE = True
-PP_MEDIAN_KERNEL = 7
+PP_MEDIAN_KERNEL = 9
 PP_MORPH_KERNEL = 5
 PP_MORPH_BIN_THRESH = 0.44
 PP_MORPH_FILL_PROB = 0.56
