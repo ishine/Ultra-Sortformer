@@ -11,6 +11,7 @@ import os
 import random
 import sys
 import time
+import types
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
@@ -64,6 +65,10 @@ N_BASE_SPKS = 4
 NUM_SPKS = 8
 
 SEED = 42
+
+# --- Inference post-processing (diarize / eval only; training path unchanged) ---
+PP_ENABLE = True
+PP_MEDIAN_KERNEL = 7
 
 # ===================================================================
 # Extracted modules — agent can modify these
@@ -966,6 +971,55 @@ def build_custom_modules(nemo_model, src_spks=SRC_NUM_SPKS, dst_spks=NUM_SPKS):
     return custom_sm, custom_tf, custom_loss
 
 
+def _approx_frame_lengths_from_audio(
+    model, audio_signal_length: torch.Tensor, max_T: int, device: torch.device
+) -> torch.Tensor:
+    hop = max(1, int(float(model._cfg.preprocessor.window_stride) * float(model._cfg.sample_rate)))
+    sub = max(1, int(model.encoder.subsampling_factor))
+    al = audio_signal_length.long().to(device)
+    return (al // (hop * sub)).clamp(min=1, max=max_T)
+
+
+def temporal_median_filter_probs(preds: torch.Tensor, kernel: int, frame_lengths: torch.Tensor) -> torch.Tensor:
+    if kernel <= 1 or (kernel % 2) == 0:
+        return preds
+    b, t, s = preds.shape
+    pad = kernel // 2
+    x = preds.permute(0, 2, 1)
+    x = F.pad(x, (pad, pad), mode="reflect")
+    unf = x.unfold(-1, kernel, 1)
+    med = unf.median(dim=-1).values
+    out = med.permute(0, 2, 1)
+    ar = torch.arange(t, device=preds.device).view(1, t).expand(b, -1)
+    m = (ar < frame_lengths.view(-1, 1)).unsqueeze(-1).expand(b, t, s)
+    return torch.where(m, out, torch.zeros_like(preds))
+
+
+def apply_infer_postprocess_probs(model, preds: torch.Tensor, audio_signal_length: torch.Tensor) -> torch.Tensor:
+    if not PP_ENABLE:
+        return preds
+    dev = preds.device
+    max_t = preds.shape[1]
+    fl = _approx_frame_lengths_from_audio(model, audio_signal_length, max_t, dev)
+    out = temporal_median_filter_probs(preds, PP_MEDIAN_KERNEL, fl)
+    return out
+
+
+def patch_nemo_forward_infer_postprocess(model):
+    if getattr(model, "_autoresearch_forward_orig", None) is not None:
+        return
+    model._autoresearch_forward_orig = model.forward
+
+    def forward_with_pp(self, audio_signal, audio_signal_length):
+        preds = self._autoresearch_forward_orig(audio_signal, audio_signal_length)
+        if self.training or not PP_ENABLE:
+            return preds
+        with torch.no_grad():
+            return apply_infer_postprocess_probs(self, preds, audio_signal_length)
+
+    model.forward = types.MethodType(forward_with_pp, model)
+
+
 def forward_infer(encoder, transformer_encoder, sortformer_modules, processed_signal, processed_signal_length):
     """Offline inference forward pass."""
     emb_seq, emb_seq_length = encoder(audio_signal=processed_signal, length=processed_signal_length)
@@ -1072,6 +1126,7 @@ if __name__ == "__main__":
     nemo_model.transformer_encoder = custom_tf
     nemo_model.loss = custom_loss
     nemo_model.concat_and_pad_script = torch.jit.script(custom_sm.concat_and_pad)
+    patch_nemo_forward_infer_postprocess(nemo_model)
 
     # --- Freeze encoder if configured ---
     if FREEZE_ENCODER:
