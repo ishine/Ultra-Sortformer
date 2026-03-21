@@ -72,6 +72,9 @@ PP_MEDIAN_KERNEL = 9
 PP_MORPH_KERNEL = 5
 PP_MORPH_BIN_THRESH = 0.44
 PP_MORPH_FILL_PROB = 0.56
+PP_GAP_MAX_FRAMES = 6
+PP_GAP_BIN_THRESH = 0.40
+PP_GAP_BRIDGE_PROB = 0.50
 
 # ===================================================================
 # Extracted modules — agent can modify these
@@ -1022,6 +1025,41 @@ def morph_close_gap_fill_probs(
     return torch.where(m, boosted, torch.zeros_like(preds))
 
 
+def fill_short_interior_silence_gaps(
+    preds: torch.Tensor,
+    frame_lengths: torch.Tensor,
+    bin_thresh: float,
+    max_gap: int,
+    bridge_prob: float,
+) -> torch.Tensor:
+    """Bridge interior silence runs (≤max_gap) framed by speech on both sides → reduce MISS."""
+    if max_gap < 1:
+        return preds
+    b, t, s = preds.shape
+    out = preds.clone()
+    binx = (preds >= bin_thresh).float()
+    x = binx.permute(0, 2, 1).contiguous()
+    fp = preds.new_tensor(bridge_prob)
+    for g in range(1, max_gap + 1):
+        if t <= g + 1:
+            break
+        w = x.unfold(-1, g + 2, 1)
+        hole = (w[..., 0] > 0.5) & (w[..., -1] > 0.5) & (w[..., 1:-1].sum(dim=-1) < 0.5)
+        tw = hole.shape[-1]
+        for i in range(tw):
+            hi = hole[:, :, i]
+            if not hi.any():
+                continue
+            sl = slice(i + 1, i + 1 + g)
+            seg = out[:, sl, :].permute(0, 2, 1)
+            hb = hi.unsqueeze(-1).expand(b, s, g)
+            seg = torch.where(hb, torch.maximum(seg, fp), seg)
+            out[:, sl, :] = seg.permute(0, 2, 1)
+    ar = torch.arange(t, device=preds.device).view(1, t).expand(b, -1)
+    m = (ar < frame_lengths.view(-1, 1)).unsqueeze(-1).expand(b, t, s)
+    return torch.where(m, out, torch.zeros_like(preds))
+
+
 def apply_infer_postprocess_probs(model, preds: torch.Tensor, audio_signal_length: torch.Tensor) -> torch.Tensor:
     if not PP_ENABLE:
         return preds
@@ -1031,6 +1069,9 @@ def apply_infer_postprocess_probs(model, preds: torch.Tensor, audio_signal_lengt
     out = temporal_median_filter_probs(preds, PP_MEDIAN_KERNEL, fl)
     out = morph_close_gap_fill_probs(
         out, PP_MORPH_KERNEL, PP_MORPH_BIN_THRESH, PP_MORPH_FILL_PROB, fl
+    )
+    out = fill_short_interior_silence_gaps(
+        out, fl, PP_GAP_BIN_THRESH, PP_GAP_MAX_FRAMES, PP_GAP_BRIDGE_PROB
     )
     return out
 
