@@ -79,7 +79,7 @@ PP_AVG_SMOOTH_KERNEL = 11
 USE_ALIBI_REL_BIAS = True
 
 DECORR_WEIGHT = 0.005
-SPK_COUNT_WEIGHT = 0.06
+SPK_COUNT_WEIGHT = 0.0
 
 # ===================================================================
 # Extracted modules — agent can modify these
