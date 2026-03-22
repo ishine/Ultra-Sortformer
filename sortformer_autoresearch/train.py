@@ -75,7 +75,7 @@ PP_MORPH_FILL_PROB = 0.56
 PP_GAP_MAX_FRAMES = 6
 PP_GAP_BIN_THRESH = 0.40
 PP_GAP_BRIDGE_PROB = 0.50
-PP_AVG_SMOOTH_KERNEL = 13
+PP_AVG_SMOOTH_KERNEL = 11
 USE_ALIBI_REL_BIAS = True
 
 # ===================================================================
