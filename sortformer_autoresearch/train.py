@@ -75,6 +75,7 @@ PP_MORPH_FILL_PROB = 0.56
 PP_GAP_MAX_FRAMES = 6
 PP_GAP_BIN_THRESH = 0.40
 PP_GAP_BRIDGE_PROB = 0.50
+USE_ALIBI_REL_BIAS = True
 
 # ===================================================================
 # Extracted modules — agent can modify these
@@ -108,7 +109,8 @@ def form_attention_mask(input_mask, diagonal=None):
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, hidden_size, num_attention_heads,
-                 attn_score_dropout=0.0, attn_layer_dropout=0.0):
+                 attn_score_dropout=0.0, attn_layer_dropout=0.0,
+                 alibi_bias=False):
         super().__init__()
         if hidden_size % num_attention_heads != 0:
             raise ValueError(
@@ -118,6 +120,9 @@ class MultiHeadAttention(nn.Module):
         self.num_attention_heads = num_attention_heads
         self.attn_head_size = hidden_size // num_attention_heads
         self.attn_scale = math.sqrt(math.sqrt(self.attn_head_size))
+        self.alibi_bias = alibi_bias
+        if alibi_bias:
+            self.alibi_slope = nn.Parameter(torch.full((num_attention_heads,), 0.08))
 
         self.query_net = nn.Linear(hidden_size, hidden_size)
         self.key_net = nn.Linear(hidden_size, hidden_size)
@@ -138,6 +143,12 @@ class MultiHeadAttention(nn.Module):
         value = self.transpose_for_scores(self.value_net(values))
 
         attention_scores = torch.matmul(query, key.transpose(-1, -2))
+        if self.alibi_bias:
+            tlen = attention_scores.size(-1)
+            idx = torch.arange(tlen, device=attention_scores.device, dtype=attention_scores.dtype)
+            dist = (idx.view(1, -1) - idx.view(-1, 1)).abs()
+            rel = -self.alibi_slope.view(-1, 1, 1) * dist.unsqueeze(0)
+            attention_scores = attention_scores + rel.unsqueeze(0)
         if attention_mask is not None:
             attention_scores = attention_scores + attention_mask.to(attention_scores.dtype)
         attention_probs = torch.softmax(attention_scores, dim=-1)
@@ -181,12 +192,14 @@ class PositionWiseFF(nn.Module):
 class TransformerEncoderBlock(nn.Module):
     def __init__(self, hidden_size, inner_size, num_attention_heads=1,
                  attn_score_dropout=0.0, attn_layer_dropout=0.0,
-                 ffn_dropout=0.0, hidden_act="relu", pre_ln=False):
+                 ffn_dropout=0.0, hidden_act="relu", pre_ln=False,
+                 alibi_bias=False):
         super().__init__()
         self.pre_ln = pre_ln
         self.layer_norm_1 = nn.LayerNorm(hidden_size, eps=1e-5)
         self.first_sub_layer = MultiHeadAttention(
-            hidden_size, num_attention_heads, attn_score_dropout, attn_layer_dropout
+            hidden_size, num_attention_heads, attn_score_dropout, attn_layer_dropout,
+            alibi_bias=alibi_bias,
         )
         self.layer_norm_2 = nn.LayerNorm(hidden_size, eps=1e-5)
         self.second_sub_layer = PositionWiseFF(hidden_size, inner_size, ffn_dropout, hidden_act)
@@ -228,7 +241,8 @@ class TransformerEncoder(nn.Module):
     def __init__(self, num_layers, hidden_size, inner_size, mask_future=False,
                  num_attention_heads=1, attn_score_dropout=0.0,
                  attn_layer_dropout=0.0, ffn_dropout=0.0,
-                 hidden_act="relu", pre_ln=False, pre_ln_final_layer_norm=True):
+                 hidden_act="relu", pre_ln=False, pre_ln_final_layer_norm=True,
+                 alibi_bias=False):
         super().__init__()
 
         if pre_ln and pre_ln_final_layer_norm:
@@ -241,6 +255,7 @@ class TransformerEncoder(nn.Module):
             hidden_size, inner_size, num_attention_heads,
             attn_score_dropout, attn_layer_dropout,
             ffn_dropout, hidden_act, pre_ln,
+            alibi_bias=alibi_bias,
         )
         self.layers = nn.ModuleList([deepcopy(layer) for _ in range(num_layers)])
         self.diag = 0 if mask_future else None
@@ -963,6 +978,7 @@ def build_custom_modules(nemo_model, src_spks=SRC_NUM_SPKS, dst_spks=NUM_SPKS):
         hidden_act="gelu",
         pre_ln=tf_cfg.get("pre_ln", False),
         pre_ln_final_layer_norm=tf_cfg.get("pre_ln_final_layer_norm", True),
+        alibi_bias=USE_ALIBI_REL_BIAS,
     )
 
     tf_state = nemo_model.transformer_encoder.state_dict()
