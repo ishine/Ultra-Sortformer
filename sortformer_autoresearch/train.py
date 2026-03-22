@@ -81,7 +81,7 @@ USE_ALIBI_REL_BIAS = True
 # --- CER / speaker-discrimination experiments (not PP param sweeps) ---
 USE_SWIGLU_FFN = True
 DECORR_WEIGHT = 0.02
-PP_PER_SPK_BIN_THRESH = True
+PP_PER_SPK_BIN_THRESH = False
 PP_PER_SPK_BIN_BASE = 0.48
 PP_PER_SPK_BIN_NEW = 0.52
 
