@@ -79,6 +79,7 @@ PP_AVG_SMOOTH_KERNEL = 11
 USE_ALIBI_REL_BIAS = True
 
 DECORR_WEIGHT = 0.005
+SPK_COUNT_WEIGHT = 0.06
 
 # ===================================================================
 # Extracted modules — agent can modify these
@@ -360,6 +361,7 @@ class SortformerModules(nn.Module):
 
         self.dropout = nn.Dropout(dropout_rate)
         self.encoder_proj = nn.Linear(self.fc_d_model, self.tf_d_model)
+        self.active_spk_count_head = nn.Linear(self.hidden_size, self.n_spk + 1)
 
         self.spkcache_len = spkcache_len
         self.fifo_len = fifo_len
@@ -432,19 +434,25 @@ class SortformerModules(nn.Module):
             start_indices = end_indices
         return output, total_lengths
 
+    def forward_speaker_sigmoids_with_count(self, hidden_out):
+        """Speaker sigmoids + per-frame active-speaker-count logits (0..n_spk)."""
+        h = self.dropout(F.relu(hidden_out))
+        h = self.first_hidden_to_hidden(h)
+        h = self.dropout(F.relu(h))
+        if self.n_base_spks > 0:
+            spk_logits = torch.cat(
+                [self.single_hidden_to_spks_base(h), self.single_hidden_to_spks_new(h)], dim=-1
+            )
+        else:
+            spk_logits = self.single_hidden_to_spks(h)
+        preds = torch.sigmoid(spk_logits)
+        count_logits = self.active_spk_count_head(h)
+        return preds, count_logits
+
     def forward_speaker_sigmoids(self, hidden_out):
         """Final layer: sigmoid speaker probabilities. Agent can modify this."""
-        hidden_out = self.dropout(F.relu(hidden_out))
-        hidden_out = self.first_hidden_to_hidden(hidden_out)
-        hidden_out = self.dropout(F.relu(hidden_out))
-        if self.n_base_spks > 0:
-            spk_preds = torch.cat([
-                self.single_hidden_to_spks_base(hidden_out),
-                self.single_hidden_to_spks_new(hidden_out),
-            ], dim=-1)
-        else:
-            spk_preds = self.single_hidden_to_spks(hidden_out)
-        return torch.sigmoid(spk_preds)
+        preds, _ = self.forward_speaker_sigmoids_with_count(hidden_out)
+        return preds
 
     @staticmethod
     def concat_embs(list_of_tensors, return_lengths=False, dim=1, device=None):
@@ -1142,6 +1150,25 @@ def patch_nemo_forward_infer_postprocess(model):
     model.forward = types.MethodType(forward_with_pp, model)
 
 
+def patch_forward_infer_spk_count_aux(model):
+    """Offline forward_infer: speaker preds + store per-frame active-count logits for training CE."""
+    if getattr(model, "_forward_infer_count_aux", False):
+        return
+
+    def forward_infer_with_count(self, emb_seq, emb_seq_length):
+        encoder_mask = self.sortformer_modules.length_to_mask(emb_seq_length, emb_seq.shape[1])
+        trans_emb_seq = self.transformer_encoder(encoder_states=emb_seq, encoder_mask=encoder_mask)
+        preds, count_logits = self.sortformer_modules.forward_speaker_sigmoids_with_count(trans_emb_seq)
+        preds = preds * encoder_mask.unsqueeze(-1)
+        if self.training:
+            self._aux_count_logits = count_logits
+            self._aux_count_valid = encoder_mask
+        return preds
+
+    model.forward_infer = types.MethodType(forward_infer_with_count, model)
+    model._forward_infer_count_aux = True
+
+
 def forward_infer(encoder, transformer_encoder, sortformer_modules, processed_signal, processed_signal_length):
     """Offline inference forward pass."""
     emb_seq, emb_seq_length = encoder(audio_signal=processed_signal, length=processed_signal_length)
@@ -1249,6 +1276,7 @@ if __name__ == "__main__":
     nemo_model.loss = custom_loss
     nemo_model.concat_and_pad_script = torch.jit.script(custom_sm.concat_and_pad)
     patch_nemo_forward_infer_postprocess(nemo_model)
+    patch_forward_infer_spk_count_aux(nemo_model)
 
     # --- Freeze encoder if configured ---
     if FREEZE_ENCODER:
@@ -1407,7 +1435,29 @@ if __name__ == "__main__":
         pil_loss = custom_loss(preds, targets_pil, target_lens)
         sm_ref = nemo_model.module.sortformer_modules if use_ddp else nemo_model.sortformer_modules
         dec_loss = speaker_output_decorrelation_loss(sm_ref)
-        loss = ats_weight * ats_loss + pil_weight * pil_loss + DECORR_WEIGHT * dec_loss
+        bm = nemo_model.module if use_ddp else nemo_model
+        count_loss = preds.new_tensor(0.0)
+        if bm.training and getattr(bm, "_aux_count_logits", None) is not None:
+            T = preds.shape[1]
+            cl = bm._aux_count_logits[:, :T, :]
+            vm = bm._aux_count_valid[:, :T]
+            tg = targets[:, :T, :]
+            tgt_count = (tg > 0.5).float().sum(dim=-1).long().clamp(0, NUM_SPKS)
+            bsz, tlen = tgt_count.shape
+            ar = torch.arange(tlen, device=preds.device).view(1, -1).expand(bsz, -1)
+            frame_ok = ar < target_lens.view(-1, 1)
+            valid = (vm > 0.5) & frame_ok
+            ce = F.cross_entropy(
+                cl.reshape(-1, NUM_SPKS + 1), tgt_count.reshape(-1), reduction="none"
+            ).view(bsz, tlen)
+            denom = valid.float().sum().clamp(min=1.0)
+            count_loss = (ce * valid.float()).sum() / denom
+        loss = (
+            ats_weight * ats_loss
+            + pil_weight * pil_loss
+            + DECORR_WEIGHT * dec_loss
+            + SPK_COUNT_WEIGHT * count_loss
+        )
 
         if torch.isnan(loss) or loss.item() > 100:
             print(f"\nFAIL: loss={loss.item():.4f} at step {step}")
@@ -1433,7 +1483,7 @@ if __name__ == "__main__":
             print(
                 f"\rstep {step:04d}/{FIXED_STEPS} | loss: {debiased:.6f} | "
                 f"ats: {ats_loss.item():.4f} | pil: {pil_loss.item():.4f} | "
-                f"dec: {dec_loss.item():.4f} | "
+                f"dec: {dec_loss.item():.4f} | cnt: {count_loss.item():.4f} | "
                 f"lr: {lr_now:.2e} | epoch: {epoch} | "
                 f"remaining: {remaining:.0f}s    ",
                 end="", flush=True,
