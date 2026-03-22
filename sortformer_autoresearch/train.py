@@ -78,8 +78,8 @@ PP_GAP_BRIDGE_PROB = 0.50
 PP_AVG_SMOOTH_KERNEL = 11
 USE_ALIBI_REL_BIAS = True
 
-# Speaker head decorrelation (CER) — exp60: auxiliary only, no SwiGLU / no PP param changes
-DECORR_WEIGHT = 0.015
+# exp61: ALiBi + SwiGLU FFN only (no decorr / no per-spk PP gate)
+USE_SWIGLU_FFN = True
 
 # ===================================================================
 # Extracted modules — agent can modify these
@@ -189,6 +189,39 @@ class PositionWiseFF(nn.Module):
         return output
 
 
+class PositionWiseFFSwiGLU(nn.Module):
+    """SwiGLU FFN — init from pretrained GELU FFN in build_custom_modules."""
+
+    def __init__(self, hidden_size, inner_size, ffn_dropout=0.0):
+        super().__init__()
+        self.gate_proj = nn.Linear(hidden_size, inner_size)
+        self.up_proj = nn.Linear(hidden_size, inner_size)
+        self.down_proj = nn.Linear(inner_size, hidden_size)
+        self.layer_dropout = nn.Dropout(ffn_dropout)
+
+    def forward(self, hidden_states):
+        g = F.silu(self.gate_proj(hidden_states))
+        u = self.up_proj(hidden_states)
+        x = self.down_proj(g * u)
+        return self.layer_dropout(x)
+
+
+def init_swiglu_ffn_from_gelu(sw: PositionWiseFFSwiGLU, gelu_sd: dict) -> None:
+    wi = gelu_sd["dense_in.weight"]
+    bi = gelu_sd["dense_in.bias"]
+    wo = gelu_sd["dense_out.weight"]
+    bo = gelu_sd["dense_out.bias"]
+    with torch.no_grad():
+        sw.down_proj.weight.copy_(wo)
+        sw.down_proj.bias.copy_(bo)
+        sw.gate_proj.weight.copy_(wi)
+        sw.gate_proj.bias.copy_(bi)
+        sw.up_proj.weight.copy_(wi.clone())
+        sw.up_proj.bias.copy_(bi.clone())
+        noise = torch.randn_like(sw.up_proj.weight) * (float(wi.std().clamp_min(1e-6)) * 0.02)
+        sw.up_proj.weight.add_(noise)
+
+
 # -------------------------------------------------------------------
 # TransformerEncoder (from NeMo transformer_encoders)
 # -------------------------------------------------------------------
@@ -197,7 +230,7 @@ class TransformerEncoderBlock(nn.Module):
     def __init__(self, hidden_size, inner_size, num_attention_heads=1,
                  attn_score_dropout=0.0, attn_layer_dropout=0.0,
                  ffn_dropout=0.0, hidden_act="relu", pre_ln=False,
-                 alibi_bias=False):
+                 alibi_bias=False, use_swiglu_ffn=False):
         super().__init__()
         self.pre_ln = pre_ln
         self.layer_norm_1 = nn.LayerNorm(hidden_size, eps=1e-5)
@@ -206,7 +239,10 @@ class TransformerEncoderBlock(nn.Module):
             alibi_bias=alibi_bias,
         )
         self.layer_norm_2 = nn.LayerNorm(hidden_size, eps=1e-5)
-        self.second_sub_layer = PositionWiseFF(hidden_size, inner_size, ffn_dropout, hidden_act)
+        if use_swiglu_ffn:
+            self.second_sub_layer = PositionWiseFFSwiGLU(hidden_size, inner_size, ffn_dropout)
+        else:
+            self.second_sub_layer = PositionWiseFF(hidden_size, inner_size, ffn_dropout, hidden_act)
         self.ls1 = nn.Parameter(torch.tensor(1.0))
         self.ls2 = nn.Parameter(torch.tensor(1.0))
 
@@ -246,7 +282,7 @@ class TransformerEncoder(nn.Module):
                  num_attention_heads=1, attn_score_dropout=0.0,
                  attn_layer_dropout=0.0, ffn_dropout=0.0,
                  hidden_act="relu", pre_ln=False, pre_ln_final_layer_norm=True,
-                 alibi_bias=False):
+                 alibi_bias=False, use_swiglu_ffn=False):
         super().__init__()
 
         if pre_ln and pre_ln_final_layer_norm:
@@ -260,6 +296,7 @@ class TransformerEncoder(nn.Module):
             attn_score_dropout, attn_layer_dropout,
             ffn_dropout, hidden_act, pre_ln,
             alibi_bias=alibi_bias,
+            use_swiglu_ffn=use_swiglu_ffn,
         )
         self.layers = nn.ModuleList([deepcopy(layer) for _ in range(num_layers)])
         self.diag = 0 if mask_future else None
@@ -929,23 +966,6 @@ def expand_sortformer_4to8(src_state, custom_sm, src_spks, dst_spks):
 
 
 # ===================================================================
-# Speaker head decorrelation (CER): penalize cosine similarity between speaker rows
-# ===================================================================
-
-def speaker_output_decorrelation_loss(sm: SortformerModules) -> torch.Tensor:
-    if sm.n_base_spks <= 0:
-        dev = next(sm.parameters()).device
-        dt = next(sm.parameters()).dtype
-        return torch.zeros((), device=dev, dtype=dt)
-    w = torch.cat([sm.single_hidden_to_spks_base.weight, sm.single_hidden_to_spks_new.weight], dim=0)
-    wn = F.normalize(w, dim=1)
-    g = torch.mm(wn, wn.t())
-    n = g.size(0)
-    mask = 1.0 - torch.eye(n, device=g.device, dtype=g.dtype)
-    return (g * mask).pow(2).sum() / (n * (n - 1))
-
-
-# ===================================================================
 # Model assembly
 # ===================================================================
 
@@ -1000,6 +1020,7 @@ def build_custom_modules(nemo_model, src_spks=SRC_NUM_SPKS, dst_spks=NUM_SPKS):
         pre_ln=tf_cfg.get("pre_ln", False),
         pre_ln_final_layer_norm=tf_cfg.get("pre_ln_final_layer_norm", True),
         alibi_bias=USE_ALIBI_REL_BIAS,
+        use_swiglu_ffn=USE_SWIGLU_FFN,
     )
 
     tf_state = nemo_model.transformer_encoder.state_dict()
@@ -1008,6 +1029,11 @@ def build_custom_modules(nemo_model, src_spks=SRC_NUM_SPKS, dst_spks=NUM_SPKS):
         print(f"  TransformerEncoder missing keys: {missing}")
     if unexpected:
         print(f"  TransformerEncoder unexpected keys: {unexpected}")
+    if USE_SWIGLU_FFN:
+        old_tf = nemo_model.transformer_encoder
+        for i, layer in enumerate(custom_tf.layers):
+            init_swiglu_ffn_from_gelu(layer.second_sub_layer, old_tf.layers[i].second_sub_layer.state_dict())
+        print("  SwiGLU FFN: initialized from pretrained GELU FFN (per layer)")
 
     custom_loss = FocalBCELoss(gamma=FOCAL_GAMMA)
 
@@ -1406,9 +1432,7 @@ if __name__ == "__main__":
 
         ats_loss = custom_loss(preds, targets_ats, target_lens)
         pil_loss = custom_loss(preds, targets_pil, target_lens)
-        sm_ref = nemo_model.module.sortformer_modules if use_ddp else nemo_model.sortformer_modules
-        dec_loss = speaker_output_decorrelation_loss(sm_ref)
-        loss = ats_weight * ats_loss + pil_weight * pil_loss + DECORR_WEIGHT * dec_loss
+        loss = ats_weight * ats_loss + pil_weight * pil_loss
 
         if torch.isnan(loss) or loss.item() > 100:
             print(f"\nFAIL: loss={loss.item():.4f} at step {step}")
@@ -1434,7 +1458,6 @@ if __name__ == "__main__":
             print(
                 f"\rstep {step:04d}/{FIXED_STEPS} | loss: {debiased:.6f} | "
                 f"ats: {ats_loss.item():.4f} | pil: {pil_loss.item():.4f} | "
-                f"dec: {dec_loss.item():.4f} | "
                 f"lr: {lr_now:.2e} | epoch: {epoch} | "
                 f"remaining: {remaining:.0f}s    ",
                 end="", flush=True,
