@@ -1378,6 +1378,8 @@ if __name__ == "__main__":
     # --- DDP model wrapping ---
     if use_ddp:
         nemo_model = DDP(nemo_model, device_ids=[local_rank], find_unused_parameters=True)
+        if hasattr(nemo_model, "_set_static_graph"):
+            nemo_model._set_static_graph()
         if is_main:
             print(f"Using {dist.get_world_size()} GPUs with DDP")
     else:
