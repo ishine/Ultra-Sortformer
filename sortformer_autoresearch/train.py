@@ -75,6 +75,7 @@ PP_MORPH_FILL_PROB = 0.56
 PP_GAP_MAX_FRAMES = 6
 PP_GAP_BIN_THRESH = 0.40
 PP_GAP_BRIDGE_PROB = 0.50
+PP_AVG_SMOOTH_KERNEL = 5
 USE_ALIBI_REL_BIAS = True
 
 # ===================================================================
@@ -1076,6 +1077,20 @@ def fill_short_interior_silence_gaps(
     return torch.where(m, out, torch.zeros_like(preds))
 
 
+def temporal_avg_smooth_probs(preds: torch.Tensor, kernel: int, frame_lengths: torch.Tensor) -> torch.Tensor:
+    if kernel <= 1 or (kernel % 2) == 0:
+        return preds
+    b, t, s = preds.shape
+    pad = kernel // 2
+    x = preds.permute(0, 2, 1)
+    x = F.pad(x, (pad, pad), mode="reflect")
+    sm = F.avg_pool1d(x, kernel, stride=1, padding=0)
+    sm = sm.permute(0, 2, 1)
+    ar = torch.arange(t, device=preds.device).view(1, t).expand(b, -1)
+    m = (ar < frame_lengths.view(-1, 1)).unsqueeze(-1).expand(b, t, s)
+    return torch.where(m, sm, torch.zeros_like(preds))
+
+
 def apply_infer_postprocess_probs(model, preds: torch.Tensor, audio_signal_length: torch.Tensor) -> torch.Tensor:
     if not PP_ENABLE:
         return preds
@@ -1089,6 +1104,7 @@ def apply_infer_postprocess_probs(model, preds: torch.Tensor, audio_signal_lengt
     out = fill_short_interior_silence_gaps(
         out, fl, PP_GAP_BIN_THRESH, PP_GAP_MAX_FRAMES, PP_GAP_BRIDGE_PROB
     )
+    out = temporal_avg_smooth_probs(out, PP_AVG_SMOOTH_KERNEL, fl)
     return out
 
 
