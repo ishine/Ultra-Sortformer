@@ -78,9 +78,6 @@ PP_GAP_BRIDGE_PROB = 0.50
 PP_AVG_SMOOTH_KERNEL = 11
 USE_ALIBI_REL_BIAS = True
 
-# exp61: ALiBi + SwiGLU FFN only (no decorr / no per-spk PP gate)
-USE_SWIGLU_FFN = True
-
 # ===================================================================
 # Extracted modules — agent can modify these
 # ===================================================================
@@ -189,39 +186,6 @@ class PositionWiseFF(nn.Module):
         return output
 
 
-class PositionWiseFFSwiGLU(nn.Module):
-    """SwiGLU FFN — init from pretrained GELU FFN in build_custom_modules."""
-
-    def __init__(self, hidden_size, inner_size, ffn_dropout=0.0):
-        super().__init__()
-        self.gate_proj = nn.Linear(hidden_size, inner_size)
-        self.up_proj = nn.Linear(hidden_size, inner_size)
-        self.down_proj = nn.Linear(inner_size, hidden_size)
-        self.layer_dropout = nn.Dropout(ffn_dropout)
-
-    def forward(self, hidden_states):
-        g = F.silu(self.gate_proj(hidden_states))
-        u = self.up_proj(hidden_states)
-        x = self.down_proj(g * u)
-        return self.layer_dropout(x)
-
-
-def init_swiglu_ffn_from_gelu(sw: PositionWiseFFSwiGLU, gelu_sd: dict) -> None:
-    wi = gelu_sd["dense_in.weight"]
-    bi = gelu_sd["dense_in.bias"]
-    wo = gelu_sd["dense_out.weight"]
-    bo = gelu_sd["dense_out.bias"]
-    with torch.no_grad():
-        sw.down_proj.weight.copy_(wo)
-        sw.down_proj.bias.copy_(bo)
-        sw.gate_proj.weight.copy_(wi)
-        sw.gate_proj.bias.copy_(bi)
-        sw.up_proj.weight.copy_(wi.clone())
-        sw.up_proj.bias.copy_(bi.clone())
-        noise = torch.randn_like(sw.up_proj.weight) * (float(wi.std().clamp_min(1e-6)) * 0.02)
-        sw.up_proj.weight.add_(noise)
-
-
 # -------------------------------------------------------------------
 # TransformerEncoder (from NeMo transformer_encoders)
 # -------------------------------------------------------------------
@@ -230,7 +194,7 @@ class TransformerEncoderBlock(nn.Module):
     def __init__(self, hidden_size, inner_size, num_attention_heads=1,
                  attn_score_dropout=0.0, attn_layer_dropout=0.0,
                  ffn_dropout=0.0, hidden_act="relu", pre_ln=False,
-                 alibi_bias=False, use_swiglu_ffn=False):
+                 alibi_bias=False):
         super().__init__()
         self.pre_ln = pre_ln
         self.layer_norm_1 = nn.LayerNorm(hidden_size, eps=1e-5)
@@ -239,10 +203,7 @@ class TransformerEncoderBlock(nn.Module):
             alibi_bias=alibi_bias,
         )
         self.layer_norm_2 = nn.LayerNorm(hidden_size, eps=1e-5)
-        if use_swiglu_ffn:
-            self.second_sub_layer = PositionWiseFFSwiGLU(hidden_size, inner_size, ffn_dropout)
-        else:
-            self.second_sub_layer = PositionWiseFF(hidden_size, inner_size, ffn_dropout, hidden_act)
+        self.second_sub_layer = PositionWiseFF(hidden_size, inner_size, ffn_dropout, hidden_act)
         self.ls1 = nn.Parameter(torch.tensor(1.0))
         self.ls2 = nn.Parameter(torch.tensor(1.0))
 
@@ -282,7 +243,7 @@ class TransformerEncoder(nn.Module):
                  num_attention_heads=1, attn_score_dropout=0.0,
                  attn_layer_dropout=0.0, ffn_dropout=0.0,
                  hidden_act="relu", pre_ln=False, pre_ln_final_layer_norm=True,
-                 alibi_bias=False, use_swiglu_ffn=False):
+                 alibi_bias=False):
         super().__init__()
 
         if pre_ln and pre_ln_final_layer_norm:
@@ -296,7 +257,6 @@ class TransformerEncoder(nn.Module):
             attn_score_dropout, attn_layer_dropout,
             ffn_dropout, hidden_act, pre_ln,
             alibi_bias=alibi_bias,
-            use_swiglu_ffn=use_swiglu_ffn,
         )
         self.layers = nn.ModuleList([deepcopy(layer) for _ in range(num_layers)])
         self.diag = 0 if mask_future else None
@@ -1020,7 +980,6 @@ def build_custom_modules(nemo_model, src_spks=SRC_NUM_SPKS, dst_spks=NUM_SPKS):
         pre_ln=tf_cfg.get("pre_ln", False),
         pre_ln_final_layer_norm=tf_cfg.get("pre_ln_final_layer_norm", True),
         alibi_bias=USE_ALIBI_REL_BIAS,
-        use_swiglu_ffn=USE_SWIGLU_FFN,
     )
 
     tf_state = nemo_model.transformer_encoder.state_dict()
@@ -1029,11 +988,6 @@ def build_custom_modules(nemo_model, src_spks=SRC_NUM_SPKS, dst_spks=NUM_SPKS):
         print(f"  TransformerEncoder missing keys: {missing}")
     if unexpected:
         print(f"  TransformerEncoder unexpected keys: {unexpected}")
-    if USE_SWIGLU_FFN:
-        old_tf = nemo_model.transformer_encoder
-        for i, layer in enumerate(custom_tf.layers):
-            init_swiglu_ffn_from_gelu(layer.second_sub_layer, old_tf.layers[i].second_sub_layer.state_dict())
-        print("  SwiGLU FFN: initialized from pretrained GELU FFN (per layer)")
 
     custom_loss = FocalBCELoss(gamma=FOCAL_GAMMA)
 
