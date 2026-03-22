@@ -1438,14 +1438,22 @@ if __name__ == "__main__":
         bm = nemo_model.module if use_ddp else nemo_model
         count_loss = preds.new_tensor(0.0)
         if bm.training and getattr(bm, "_aux_count_logits", None) is not None:
-            T = preds.shape[1]
-            cl = bm._aux_count_logits[:, :T, :]
-            vm = bm._aux_count_valid[:, :T]
-            tg = targets[:, :T, :]
+            cl_full = bm._aux_count_logits
+            vm_full = bm._aux_count_valid
+            T_eff = min(
+                preds.shape[1],
+                cl_full.shape[1],
+                vm_full.shape[1],
+                targets.shape[1],
+            )
+            cl = cl_full[:, :T_eff, :]
+            vm = vm_full[:, :T_eff]
+            tg = targets[:, :T_eff, :]
             tgt_count = (tg > 0.5).float().sum(dim=-1).long().clamp(0, NUM_SPKS)
             bsz, tlen = tgt_count.shape
+            tl = target_lens.clamp(max=T_eff)
             ar = torch.arange(tlen, device=preds.device).view(1, -1).expand(bsz, -1)
-            frame_ok = ar < target_lens.view(-1, 1)
+            frame_ok = ar < tl.view(-1, 1)
             valid = (vm > 0.5) & frame_ok
             ce = F.cross_entropy(
                 cl.reshape(-1, NUM_SPKS + 1), tgt_count.reshape(-1), reduction="none"
