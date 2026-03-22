@@ -78,6 +78,8 @@ PP_GAP_BRIDGE_PROB = 0.50
 PP_AVG_SMOOTH_KERNEL = 11
 USE_ALIBI_REL_BIAS = True
 
+DECORR_WEIGHT = 0.005
+
 # ===================================================================
 # Extracted modules — agent can modify these
 # ===================================================================
@@ -926,6 +928,23 @@ def expand_sortformer_4to8(src_state, custom_sm, src_spks, dst_spks):
 
 
 # ===================================================================
+# Speaker head decorrelation (low-λ CER regularizer)
+# ===================================================================
+
+def speaker_output_decorrelation_loss(sm: SortformerModules) -> torch.Tensor:
+    if sm.n_base_spks <= 0:
+        dev = next(sm.parameters()).device
+        dt = next(sm.parameters()).dtype
+        return torch.zeros((), device=dev, dtype=dt)
+    w = torch.cat([sm.single_hidden_to_spks_base.weight, sm.single_hidden_to_spks_new.weight], dim=0)
+    wn = F.normalize(w, dim=1)
+    g = torch.mm(wn, wn.t())
+    n = g.size(0)
+    mask = 1.0 - torch.eye(n, device=g.device, dtype=g.dtype)
+    return (g * mask).pow(2).sum() / (n * (n - 1))
+
+
+# ===================================================================
 # Model assembly
 # ===================================================================
 
@@ -1386,7 +1405,9 @@ if __name__ == "__main__":
 
         ats_loss = custom_loss(preds, targets_ats, target_lens)
         pil_loss = custom_loss(preds, targets_pil, target_lens)
-        loss = ats_weight * ats_loss + pil_weight * pil_loss
+        sm_ref = nemo_model.module.sortformer_modules if use_ddp else nemo_model.sortformer_modules
+        dec_loss = speaker_output_decorrelation_loss(sm_ref)
+        loss = ats_weight * ats_loss + pil_weight * pil_loss + DECORR_WEIGHT * dec_loss
 
         if torch.isnan(loss) or loss.item() > 100:
             print(f"\nFAIL: loss={loss.item():.4f} at step {step}")
@@ -1412,6 +1433,7 @@ if __name__ == "__main__":
             print(
                 f"\rstep {step:04d}/{FIXED_STEPS} | loss: {debiased:.6f} | "
                 f"ats: {ats_loss.item():.4f} | pil: {pil_loss.item():.4f} | "
+                f"dec: {dec_loss.item():.4f} | "
                 f"lr: {lr_now:.2e} | epoch: {epoch} | "
                 f"remaining: {remaining:.0f}s    ",
                 end="", flush=True,
