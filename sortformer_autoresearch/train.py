@@ -76,9 +76,10 @@ PP_GAP_MAX_FRAMES = 6
 PP_GAP_BIN_THRESH = 0.40
 PP_GAP_BRIDGE_PROB = 0.50
 PP_AVG_SMOOTH_KERNEL = 11
-USE_ALIBI_REL_BIAS = False
-USE_ROPE = True
+USE_ALIBI_REL_BIAS = True
+USE_ROPE = False
 ROPE_THETA = 10000.0
+LOCAL_ATTN_RADIUS = 96
 
 DECORR_WEIGHT = 0.005
 
@@ -136,7 +137,8 @@ def _apply_rope_qk(
 class MultiHeadAttention(nn.Module):
     def __init__(self, hidden_size, num_attention_heads,
                  attn_score_dropout=0.0, attn_layer_dropout=0.0,
-                 alibi_bias=False, rope=False, rope_theta=10000.0):
+                 alibi_bias=False, rope=False, rope_theta=10000.0,
+                 local_attn_radius=None):
         super().__init__()
         if hidden_size % num_attention_heads != 0:
             raise ValueError(
@@ -151,6 +153,7 @@ class MultiHeadAttention(nn.Module):
         self.alibi_bias = alibi_bias
         self.rope = rope
         self.rope_theta = rope_theta
+        self.local_attn_radius = local_attn_radius
         if alibi_bias:
             self.alibi_slope = nn.Parameter(torch.full((num_attention_heads,), 0.08))
 
@@ -182,6 +185,13 @@ class MultiHeadAttention(nn.Module):
             dist = (idx.view(1, -1) - idx.view(-1, 1)).abs()
             rel = -self.alibi_slope.view(-1, 1, 1) * dist.unsqueeze(0)
             attention_scores = attention_scores + rel.unsqueeze(0)
+        if self.local_attn_radius is not None:
+            W = self.local_attn_radius
+            tlen = attention_scores.size(-1)
+            idx = torch.arange(tlen, device=attention_scores.device, dtype=attention_scores.dtype)
+            dist = (idx.view(1, -1) - idx.view(-1, 1)).abs()
+            block = (dist > float(W)).to(attention_scores.dtype) * NEG_INF
+            attention_scores = attention_scores + block.unsqueeze(0).unsqueeze(0)
         if attention_mask is not None:
             attention_scores = attention_scores + attention_mask.to(attention_scores.dtype)
         attention_probs = torch.softmax(attention_scores, dim=-1)
@@ -226,13 +236,15 @@ class TransformerEncoderBlock(nn.Module):
     def __init__(self, hidden_size, inner_size, num_attention_heads=1,
                  attn_score_dropout=0.0, attn_layer_dropout=0.0,
                  ffn_dropout=0.0, hidden_act="relu", pre_ln=False,
-                 alibi_bias=False, rope=False, rope_theta=10000.0):
+                 alibi_bias=False, rope=False, rope_theta=10000.0,
+                 local_attn_radius=None):
         super().__init__()
         self.pre_ln = pre_ln
         self.layer_norm_1 = nn.LayerNorm(hidden_size, eps=1e-5)
         self.first_sub_layer = MultiHeadAttention(
             hidden_size, num_attention_heads, attn_score_dropout, attn_layer_dropout,
             alibi_bias=alibi_bias, rope=rope, rope_theta=rope_theta,
+            local_attn_radius=local_attn_radius,
         )
         self.layer_norm_2 = nn.LayerNorm(hidden_size, eps=1e-5)
         self.second_sub_layer = PositionWiseFF(hidden_size, inner_size, ffn_dropout, hidden_act)
@@ -275,7 +287,8 @@ class TransformerEncoder(nn.Module):
                  num_attention_heads=1, attn_score_dropout=0.0,
                  attn_layer_dropout=0.0, ffn_dropout=0.0,
                  hidden_act="relu", pre_ln=False, pre_ln_final_layer_norm=True,
-                 alibi_bias=False, rope=False, rope_theta=10000.0):
+                 alibi_bias=False, rope=False, rope_theta=10000.0,
+                 local_attn_radius=None):
         super().__init__()
 
         if pre_ln and pre_ln_final_layer_norm:
@@ -289,6 +302,7 @@ class TransformerEncoder(nn.Module):
             attn_score_dropout, attn_layer_dropout,
             ffn_dropout, hidden_act, pre_ln,
             alibi_bias=alibi_bias, rope=rope, rope_theta=rope_theta,
+            local_attn_radius=local_attn_radius,
         )
         self.layers = nn.ModuleList([deepcopy(layer) for _ in range(num_layers)])
         self.diag = 0 if mask_future else None
@@ -1031,6 +1045,7 @@ def build_custom_modules(nemo_model, src_spks=SRC_NUM_SPKS, dst_spks=NUM_SPKS):
         alibi_bias=USE_ALIBI_REL_BIAS,
         rope=USE_ROPE,
         rope_theta=ROPE_THETA,
+        local_attn_radius=LOCAL_ATTN_RADIUS if LOCAL_ATTN_RADIUS > 0 else None,
     )
 
     tf_state = nemo_model.transformer_encoder.state_dict()
@@ -1041,6 +1056,8 @@ def build_custom_modules(nemo_model, src_spks=SRC_NUM_SPKS, dst_spks=NUM_SPKS):
         print(f"  TransformerEncoder unexpected keys: {unexpected}")
     if USE_ROPE:
         print(f"  TransformerEncoder: RoPE (theta={ROPE_THETA}), ALiBi off")
+    if LOCAL_ATTN_RADIUS and LOCAL_ATTN_RADIUS > 0:
+        print(f"  TransformerEncoder: local attention radius ±{LOCAL_ATTN_RADIUS} frames")
 
     custom_loss = FocalBCELoss(gamma=FOCAL_GAMMA)
 
