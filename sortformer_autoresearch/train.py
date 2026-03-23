@@ -84,13 +84,13 @@ LOCAL_ATTN_RADIUS = 0
 DECORR_WEIGHT = 0.005
 
 # --- Early stopping (skip bad experiments faster) ---
-EARLY_STOP_ENABLE = True
+EARLY_STOP_ENABLE = False
 EARLY_STOP_PATIENCE = 300
 EARLY_STOP_CHECK_AFTER = 400
 EARLY_STOP_MIN_DELTA = 1e-4
 
 # Progressive unfreeze (1순위): steps [0,500) SM only; [500,1000) TF layers 12–17; [1000,∞) full TF
-USE_PROGRESSIVE_UNFREEZE = True
+USE_PROGRESSIVE_UNFREEZE = False
 PROG_UNFREEZE_STEP1 = 500
 PROG_UNFREEZE_STEP2 = 1000
 PROG_UNFREEZE_FIRST_TF_LAYER = 12
@@ -1543,16 +1543,24 @@ if __name__ == "__main__":
             )
 
         if EARLY_STOP_ENABLE and step >= EARLY_STOP_CHECK_AFTER:
-            if debiased < best_smooth_loss - EARLY_STOP_MIN_DELTA:
-                best_smooth_loss = debiased
-                steps_without_improvement = 0
-            else:
-                steps_without_improvement += 1
-            if steps_without_improvement >= EARLY_STOP_PATIENCE:
+            stop_tensor = torch.zeros(1, device=device, dtype=torch.int32)
+            if is_main:
+                if debiased < best_smooth_loss - EARLY_STOP_MIN_DELTA:
+                    best_smooth_loss = debiased
+                    steps_without_improvement = 0
+                else:
+                    steps_without_improvement += 1
+                if steps_without_improvement >= EARLY_STOP_PATIENCE:
+                    stop_tensor[0] = 1
+            if use_ddp:
+                dist.broadcast(stop_tensor, src=0)
+            if stop_tensor.item() == 1:
                 if is_main:
-                    print(f"\n[Early Stop] No improvement for {EARLY_STOP_PATIENCE} steps "
-                          f"(best={best_smooth_loss:.6f}, current={debiased:.6f}). "
-                          f"Stopping at step {step}.")
+                    print(
+                        f"\n[Early Stop] No improvement for {EARLY_STOP_PATIENCE} steps "
+                        f"(best={best_smooth_loss:.6f}, current={debiased:.6f}). "
+                        f"Stopping at step {step}."
+                    )
                 early_stopped = True
                 step += 1
                 break
