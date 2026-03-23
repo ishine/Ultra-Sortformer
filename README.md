@@ -1,13 +1,15 @@
 # Ultra-Sortformer: Extending NVIDIA Sortformer to N Speakers
 
 [![5spk Model on Hugging Face](https://huggingface.co/datasets/huggingface/badges/resolve/main/model-on-hf-md.svg)](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_5spk_v1)
-[![8spk Model on Hugging Face (v0)](https://huggingface.co/datasets/huggingface/badges/resolve/main/model-on-hf-md.svg)](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v0)
+[![8spk Model on Hugging Face](https://huggingface.co/datasets/huggingface/badges/resolve/main/model-on-hf-md.svg)](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1)
 
-This project documents the ongoing journey of extending **NVIDIA's Streaming Sortformer** speaker diarization model from 4 speakers toward 8 speakers — without retraining from scratch. The core idea is to surgically expand the output layer using orthogonal initialization, then fine-tune with differential learning rates to preserve existing knowledge while teaching the model new speakers.
+This project extends **NVIDIA's Streaming Sortformer** speaker diarization from the **4-speaker** baseline to **5- and 8-speaker** models. The approach is to expand the output layer with **orthogonal initialization**, then **fine-tune** with **split learning rates** so existing behavior stays stable while new speaker dimensions are learned.
 
-> **Current status**: 5spk ✅ → 6spk ✅ → 7spk 🔄 → 8spk v0 ⚠️ (preliminary)
->
-> An initial 4→8 direct extension (`8spk_v0`) was released on Hugging Face but showed unsatisfactory performance — motivating the current step-by-step approach to preserve quality at each stage.
+**Released models (Hugging Face)**  
+- [ultra_diar_streaming_sortformer_5spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_5spk_v1) — up to 5 speakers  
+- [ultra_diar_streaming_sortformer_8spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1) — up to 8 speakers (4→8 extension + training)
+
+Full benchmark tables: [`results/eval_results.md`](results/eval_results.md).
 
 ---
 
@@ -19,7 +21,7 @@ This project documents the ongoing journey of extending **NVIDIA's Streaming Sor
    - [Step 1: Output Layer Extension (4 → 5spk)](#step-1-output-layer-extension-4--5spk)
    - [Step 2: Split Learning Rate Training](#step-2-split-learning-rate-training)
    - [Step 3: Layer Repeat Experiments (LLM Neuroanatomy)](#step-3-layer-repeat-experiments-llm-neuroanatomy)
-   - [Step 4: Extending to 6–8 Speakers (In Progress)](#step-4-extending-to-6-7-8-speakers-in-progress-)
+   - [Step 4: Extending to 8 Speakers](#step-4-extending-to-8-speakers)
 4. [Evaluation Results](#evaluation-results)
 5. [Synthetic Training Data](#synthetic-training-data)
 6. [Training](#training)
@@ -267,43 +269,28 @@ Based on the layer repeat findings, we permanently duplicated specific Transform
 
 ---
 
-### Step 4: Extending to 6, 7, 8 Speakers (In Progress 🔄)
+### Step 4: Extending to 8 Speakers
 
-A direct 4→8 extension (`8spk_v0`) was attempted first but produced unsatisfactory performance. The iterative approach was adopted to progressively build quality at each speaker count before moving to the next.
+The **8-speaker** model starts from the NVIDIA **4spk** checkpoint, extends the Sortformer output head with the same orthogonal / split-layer pipeline as above, and is **fine-tuned** with split learning rates (`~1e-5` base, `~1e-4` on new head parameters) on mixed synthetic + real meeting data.
 
-Each step starts from the previous model:
+- **Hugging Face**: [devsy0117/ultra_diar_streaming_sortformer_8spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1)  
+- **Weights**: `ultra_diar_streaming_sortformer_8spk_v1.0.nemo` (same checkpoint as the Hub release)
 
-```
-4spk (NVIDIA baseline)
-  └─ extend_output_layer.py → fine-tune (split LR)
-       └─ 5spk ✅
-            └─ extend_output_layer.py → fine-tune (split LR)
-                 └─ 6spk ✅
-                      └─ [layer repeat experiments + permanent expansion]
-                      └─ extend_output_layer.py → fine-tune (split LR)
-                           └─ 7spk 🔄
-                                └─ extend_output_layer.py → fine-tune (split LR)
-                                     └─ 8spk v1 (planned, supersedes v0)
-```
+Example training command shape (paths and manifests depend on your setup):
 
-For each step:
 ```bash
-# 1. Extend output layer
-python scripts/extend_output_layer.py \
-    --src <N>spk_model.nemo \
-    --dst-spk $((N+1)) \
-    --out $((N+1))spk_split_output.nemo
-
-# 2. Fine-tune with split learning rate
-python NeMo/examples/.../streaming_sortformer_diar_train.py \
-    +init_from_nemo_model=$((N+1))spk_split_output.nemo \
-    model.max_num_of_spks=$((N+1)) \
-    +model.sortformer_modules.n_base_spks=$N \
-    model.lr=1e-5 \
-    +model.optim_new_lr=1e-4
+python NeMo/examples/speaker_tasks/diarization/neural_diarizer/streaming_sortformer_diar_train.py \
+  --config-path=/path/to/conf/neural_diarizer \
+  --config-name=streaming_sortformer_diarizer_4spk-v2.yaml \
+  +init_from_nemo_model=/path/to/prior_8spk_checkpoint.nemo \
+  model.train_ds.manifest_filepath=/path/to/train.json \
+  model.validation_ds.manifest_filepath=/path/to/val.json \
+  +model.sortformer_modules.n_base_spks=4 \
+  model.lr=1e-5 \
+  +model.optim_new_lr=1e-4 \
+  exp_manager.name=sortformer_8spk_run \
+  exp_manager.exp_dir=/path/to/logs
 ```
-
-Training data for each step uses 200 sessions per dataset (synthetic 2–Nspk + AliMeeting + AMI IHM + AMI SDM), ensuring no overlap with data used in previous steps.
 
 ---
 
@@ -334,7 +321,7 @@ All sessions use ~10% mean silence. Overlap and silence ratios are means; indivi
 
 ## Evaluation Results
 
-Comparison of `ultra_diar_streaming_sortformer_5spk_v1.0` vs the base model `diar_streaming_sortformer_4spk-v2.1`.
+Comparisons below use the NVIDIA base [`diar_streaming_sortformer_4spk-v2.1`](https://huggingface.co/nvidia/diar_streaming_sortformer_4spk-v2.1). See [`results/eval_results.md`](results/eval_results.md) for the full benchmark (all models and datasets).
 
 ### Evaluation Parameters
 
@@ -346,28 +333,30 @@ Comparison of `ultra_diar_streaming_sortformer_5spk_v1.0` vs the base model `dia
 | Chunk size | 340 frames |
 | Batch size | 1 |
 
-### AliMeeting (test)
+### 5-speaker model (`ultra_diar_streaming_sortformer_5spk_v1.0`)
+
+#### AliMeeting (test)
 
 | Model | DER | FA | MISS | CER | Spk_Count_Acc |
 |-------|-----|----|------|-----|---------------|
 | diar_streaming_sortformer_4spk-v2.1 (base) | 11.03% | 0.40% | 9.93% | 0.70% | 95.00% |
 | ultra_diar_streaming_sortformer_5spk_v1.0 | **5.85%** | 1.03% | 3.80% | 1.01% | 65.00% |
 
-### AMI IHM (test)
+#### AMI IHM (test)
 
 | Model | DER | FA | MISS | CER | Spk_Count_Acc |
 |-------|-----|----|------|-----|---------------|
 | diar_streaming_sortformer_4spk-v2.1 (base) | 26.05% | 0.50% | 23.51% | 2.03% | 93.75% |
 | ultra_diar_streaming_sortformer_5spk_v1.0 | **10.98%** | 1.48% | 7.79% | 1.71% | 68.75% |
 
-### AMI SDM (test)
+#### AMI SDM (test)
 
 | Model | DER | FA | MISS | CER | Spk_Count_Acc |
 |-------|-----|----|------|-----|---------------|
 | diar_streaming_sortformer_4spk-v2.1 (base) | 28.29% | 0.82% | 23.76% | 3.72% | 93.75% |
 | ultra_diar_streaming_sortformer_5spk_v1.0 | **14.33%** | 2.09% | 8.33% | 3.91% | 87.50% |
 
-### CallHome (test)
+#### CallHome (test)
 
 | Model | eng | deu | jpn | spa | zho |
 |-------|-----|-----|-----|-----|-----|
@@ -376,7 +365,43 @@ Comparison of `ultra_diar_streaming_sortformer_5spk_v1.0` vs the base model `dia
 | diar_streaming_sortformer_4spk-v2.1 (base) Spk_Acc | 83.57% | 80.83% | 79.17% | 63.57% | 72.86% |
 | ultra_diar_streaming_sortformer_5spk_v1.0 Spk_Acc | **87.86%** | **86.67%** | **83.33%** | **72.14%** | 72.86% |
 
-> **Note**: The base model (v2.1) is hard-limited to 4 speakers. The DER improvement on AliMeeting and AMI reflects the reduced MISS rate from correctly predicting 5th speaker activity. Lower `Spk_Count_Acc` on some datasets reflects the trade-off of extending to 5-speaker support.
+> **Note (5spk)**: The base model is limited to 4 speakers. DER gains on AliMeeting / AMI largely come from better alignment with 5-speaker sessions; `Spk_Count_Acc` can drop where the model predicts 5 speakers on shorter clips.
+
+### 8-speaker model (`ultra_diar_streaming_sortformer_8spk_v1.0`)
+
+Hugging Face: [devsy0117/ultra_diar_streaming_sortformer_8spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1)
+
+#### AliMeeting (test)
+
+| Model | DER | FA | MISS | CER | Spk_Count_Acc |
+|-------|-----|----|------|-----|---------------|
+| diar_streaming_sortformer_4spk-v2.1 (base) | 11.03% | 0.40% | 9.93% | 0.70% | 95.00% |
+| ultra_diar_streaming_sortformer_8spk_v1.0 | **5.69%** | 1.12% | 3.89% | 0.68% | 100.00% |
+
+#### AMI IHM (test)
+
+| Model | DER | FA | MISS | CER | Spk_Count_Acc |
+|-------|-----|----|------|-----|---------------|
+| diar_streaming_sortformer_4spk-v2.1 (base) | 26.05% | 0.50% | 23.51% | 2.03% | 93.75% |
+| ultra_diar_streaming_sortformer_8spk_v1.0 | **10.87%** | 1.53% | 7.89% | 1.44% | 81.25% |
+
+#### AMI SDM (test)
+
+| Model | DER | FA | MISS | CER | Spk_Count_Acc |
+|-------|-----|----|------|-----|---------------|
+| diar_streaming_sortformer_4spk-v2.1 (base) | 28.29% | 0.82% | 23.76% | 3.72% | 93.75% |
+| ultra_diar_streaming_sortformer_8spk_v1.0 | **15.61%** | 2.33% | 8.23% | 5.05% | 75.00% |
+
+#### CallHome (test)
+
+| Model | eng | deu | jpn | spa | zho |
+|-------|-----|-----|-----|-----|-----|
+| diar_streaming_sortformer_4spk-v2.1 (base) DER | 4.94% | 6.70% | 10.03% | 23.27% | 7.15% |
+| ultra_diar_streaming_sortformer_8spk_v1.0 DER | 8.20% | 7.70% | 11.11% | **18.24%** | 10.16% |
+| diar_streaming_sortformer_4spk-v2.1 (base) Spk_Acc | 83.57% | 80.83% | 79.17% | 63.57% | 72.86% |
+| ultra_diar_streaming_sortformer_8spk_v1.0 Spk_Acc | **92.86%** | **90.00%** | **89.17%** | **70.00%** | **75.00%** |
+
+> **Note (8spk)**: Extending to 8 speakers changes speaker-count behavior on low-speaker or short clips; interpret `Spk_Count_Acc` next to DER. See the model card on Hugging Face for details.
 
 ---
 
