@@ -9,8 +9,6 @@ This project extends **NVIDIA's Streaming Sortformer** speaker diarization from 
 - [ultra_diar_streaming_sortformer_5spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_5spk_v1) — up to 5 speakers  
 - [ultra_diar_streaming_sortformer_8spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1) — up to 8 speakers (4→8 extension + training)
 
-Full benchmark tables: [`results/eval_results.md`](results/eval_results.md).
-
 ---
 
 ## Table of Contents
@@ -20,7 +18,7 @@ Full benchmark tables: [`results/eval_results.md`](results/eval_results.md).
 3. [Extension Journey](#extension-journey)
    - [Step 1: Output Layer Extension (4 → 5spk)](#step-1-output-layer-extension-4--5spk)
    - [Step 2: Split Learning Rate Training](#step-2-split-learning-rate-training)
-   - [Step 3: Layer Repeat Experiments (LLM Neuroanatomy)](#step-3-layer-repeat-experiments-llm-neuroanatomy)
+   - [Step 3: Layer Expansion Experiments](#step-3-layer-expansion-experiments)
    - [Step 4: Extending to 8 Speakers](#step-4-extending-to-8-speakers)
 4. [Evaluation Results](#evaluation-results)
 5. [Synthetic Training Data](#synthetic-training-data)
@@ -176,96 +174,19 @@ python NeMo/examples/speaker_tasks/diarization/neural_diarizer/streaming_sortfor
 
 ---
 
-### Step 3: Layer Repeat Experiments (LLM Neuroanatomy)
+### Step 3: Layer Expansion Experiments
 
-Inspired by [dnhkng's RYS-XLarge](https://github.com/dnhkng/GlitchHunter) — which reached #1 on the Open LLM Leaderboard by duplicating 7 middle layers of Qwen2-72B without any weight modification — we applied the same technique to Sortformer's Transformer encoder.
+Inspired by [dnhkng's RYS-XLarge](https://github.com/dnhkng/GlitchHunter) — which reached #1 on the Open LLM Leaderboard by duplicating middle layers of Qwen2-72B without any weight modification — we experimented with **layer repeat** and **permanent layer duplication** on Sortformer's 18-layer Transformer encoder.
 
-**Script**: `scripts/layer_repeat_experiment.py`
+**Scripts**: `scripts/layer_repeat_experiment.py`, `scripts/expand_transformer_layers.py`
 
-#### Concept
+We ran layer repeat (re-executing a block [i, j] twice) across all (start, end) combinations on 65 real-world test samples, and also tested permanent duplication of blocks like L8-9, L14-17. Key observations:
 
-For a model with L layers, configuration (i, j) means:
-```
-Original:   0 → 1 → 2 → ... → i → ... → j → ... → L
-Repeated:   0 → 1 → ... → i → ... → j → i → ... → j → j+1 → ... → L
-```
-The block [i, j] is executed twice. No weights are changed.
+- **Layers 0–7** handle acoustic encoding; **layers 8–9** are the core diarization reasoning block (most sensitive to modification); **layers 14–17** drive speaker count judgment.
+- **L14-17 duplication** dramatically boosted Speaker Count Accuracy on real-world data (e.g., AMI IHM: 43.75% → 87.50%), but increased DER without fine-tuning.
+- Layer expansion without subsequent fine-tuning reliably increases MISS at the junction between original and copied blocks.
 
-#### Findings on Sortformer (18-layer Transformer)
-
-We ran all (start, end) combinations with block sizes 1–18 across 65 real-world test samples (AliMeeting, AMI IHM/SDM, CallHome, K-domain, synthetic 6spk):
-
-| Metric | Best block | Effect |
-|--------|-----------|--------|
-| DER | 8–9 (block=2) | Slight improvement on some real-world sets |
-| Spk_Count_Acc | 14–17 (block=4), 2–10 (block=9) | +3–5% improvement |
-
-**Hypothesis**: The 18-layer Transformer is compact enough that functional circuits overlap, but a rough anatomy emerges:
-
-```
-Layers  0–7 : acoustic feature encoding, cross-speaker attention
-Layers  8–9 : core diarization reasoning (most sensitive)
-Layers 10–13: speaker discrimination refinement
-Layers 14–17: speaker count judgment (repeatable without major DER damage)
-```
-
-#### Heatmaps
-
-DER heatmap (lower = better, repeating layers ~8–9 causes least degradation):
-
-![DER Heatmap](results/heatmap_eval_all_realworld_DER.png)
-
-Speaker Count Accuracy heatmap (higher = better, layers 14–17 show improvement):
-
-![Spk_Count_Acc Heatmap](results/heatmap_eval_all_realworld_Spk_Count_Acc.png)
-
-
-
----
-
-### Step 4.5: Permanent Layer Expansion Experiments
-
-Based on the layer repeat findings, we permanently duplicated specific Transformer encoder blocks (using `scripts/expand_transformer_layers.py`) and evaluated each without any fine-tuning to assess the raw structural impact.
-
-**Key insight**: Layer duplication without fine-tuning reliably increases MISS (the junction between original and copied blocks is untrained), but reveals which blocks drive which capabilities.
-
-#### Models Tested
-
-| Model | Duplicated Block | Layers after | Notes |
-|-------|-----------------|--------------|-------|
-| Base (no expansion) | — | 18 | Baseline |
-| `expanded_L8-9` | [8, 9] | 20 | Core reasoning block |
-| `expanded_L16-17` | [16, 17] | 20 | Output-adjacent block |
-| `expanded_L14-17` | [14, 17] | 22 | Full speaker-count block |
-| `expanded_L8-9_L14-17` | [8,9] + [14,17] | 24 | Combined |
-
-#### Results Summary (eval on 65 real-world samples)
-
-**DER (lower = better)**
-
-| Model | val_5spk | val_6spk | AliMeeting | AMI IHM | AMI SDM |
-|-------|---------|---------|------------|---------|---------|
-| Base | 2.38% | 4.22% | 6.28% | 13.58% | 14.81% |
-| L8-9 | 2.50% | 4.43% | 6.48% | **11.78%** | 17.21% |
-| L16-17 | 2.29% | 5.07% | 7.04% | 14.98% | 20.14% |
-| L14-17 | 3.64% | 7.18% | 7.59% | 15.26% | 17.74% |
-| L8-9+L14-17 | 3.79% | 9.02% | 8.05% | 15.69% | 20.76% |
-
-**Speaker Count Accuracy (higher = better)**
-
-| Model | val_6spk | AliMeeting | AMI IHM | AMI SDM | CallHome avg |
-|-------|---------|------------|---------|---------|-------------|
-| Base | 69% | 80% | 43.75% | 50% | 79.6% |
-| L8-9 | **71%** | 75% | 56.25% | 56.25% | 81.7% |
-| L16-17 | 59% | 80% | 62.50% | 75% | **84.9%** |
-| L14-17 | 52% | **90%** | **87.50%** | **87.50%** | 84.2% |
-| L8-9+L14-17 | 50% | 85% | 75% | 81.25% | 84.9% |
-
-#### Key Takeaways
-
-- **L8-9** is the most balanced: smallest DER degradation on synthetic val, and AMI IHM DER actually *improves* (13.58% → 11.78%)
-- **L14-17** dramatically boosts Spk_Count_Acc on real-world data (AMI IHM: 43.75% → 87.50%), confirming this block drives speaker count judgment — at the cost of higher DER without fine-tuning
-- **Combined L8-9+L14-17** gives the best Spk_Count_Acc on CallHome but degrades synthetic val DER the most
+These experiments served as an architectural analysis tool; no layer-expanded models were used for final training.
 
 ---
 
@@ -321,7 +242,7 @@ All sessions use ~10% mean silence. Overlap and silence ratios are means; indivi
 
 ## Evaluation Results
 
-Comparisons below use the NVIDIA base [`diar_streaming_sortformer_4spk-v2.1`](https://huggingface.co/nvidia/diar_streaming_sortformer_4spk-v2.1). See [`results/eval_results.md`](results/eval_results.md) for the full benchmark (all models and datasets).
+Comparisons below use the NVIDIA base [`diar_streaming_sortformer_4spk-v2.1`](https://huggingface.co/nvidia/diar_streaming_sortformer_4spk-v2.1).
 
 ### Evaluation Parameters
 
@@ -334,8 +255,6 @@ Comparisons below use the NVIDIA base [`diar_streaming_sortformer_4spk-v2.1`](ht
 | Batch size | 1 |
 
 ### `ultra_diar_streaming_sortformer_8spk_v1.0`
-
-Hugging Face: [devsy0117/ultra_diar_streaming_sortformer_8spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1)
 
 #### AliMeeting (test)
 

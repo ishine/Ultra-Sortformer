@@ -49,3 +49,4 @@ cdca57d	0.208381	fa=0.04|miss=0.11|cer=0.06	14.7	discard	exp64 count CE weight 0
 9f4e3a3	0.220020	fa=0.05|miss=0.11|cer=0.06	14.7	discard	exp67 ALiBi + local attn ±96 frames (DER up)
 5377849	-	-	-	keep	exp68 hyperparams = exp65 (LOCAL=0); RoPE/local code retained off
 c250ac1	0.220908	fa=0.04|miss=0.11|cer=0.07	14.8	discard	exp69 progressive unfreeze: steps [0,500) SM only; [500,1000) TF layers 12–17; [1000,∞) full TF. EARLY_STOP off + rank0 broadcast stop (DDP fix). DER vs exp65 0.2032
+-	0.231858	fa=0.03|miss=0.12|cer=0.08	14.8	discard	exp70 progressive extended [0,1000) SM only; [1000,1500) TF 12+; [1500,2000) full (full-TF phase shortened vs exp69). Log: run_exp70.log

@@ -178,4 +178,5 @@ Median Filter (k=9) → Morph Close (k=5) → Gap Fill (max 6f) → Avg Smooth (
 5. **MISS와 CER은 trade-off** — MISS를 줄이면 CER이 올라가는 경향. 균형이 중요
 6. **보조 Loss는 약하게** — λ=0.005 성공, λ=0.015 실패
 7. **DDP에서 조기 종료는 rank0만 판단 후 broadcast** — `debiased`가 랭크마다 달라 한쪽만 `break`하면 NCCL 타임아웃. 재활성화 시 `dist.broadcast(stop_tensor, src=0)` 경로 사용
-8. **Progressive unfreeze (exp69)** — 500/1000/12–17 스케줄 단독 적용 시 DER **0.2209**로 exp65(0.2032) 대비 악화 → 1순위 추가 실험(스케줄 변형) 또는 2순위(overlap loss) 검토
+8. **Progressive unfreeze (exp69–70)** — exp69(500/1000/12–17) DER **0.2209**, exp70(1000/1500/12–17) **0.2319**로 exp65 대비 모두 악화 → **1순위 포기**, 기본 `USE_PROGRESSIVE_UNFREEZE=False`
+9. **Overlap-aware Focal BCE (2순위)** — 타깃에서 활성 화자 수 ≥2인 프레임에 `OVERLAP_LOSS_WEIGHT`(1.5–2.0) 적용; `USE_OVERLAP_LOSS_WEIGHTING`로 켜고 끔

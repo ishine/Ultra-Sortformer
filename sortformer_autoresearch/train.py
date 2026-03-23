@@ -89,11 +89,16 @@ EARLY_STOP_PATIENCE = 300
 EARLY_STOP_CHECK_AFTER = 400
 EARLY_STOP_MIN_DELTA = 1e-4
 
-# Progressive unfreeze (1순위): steps [0,500) SM only; [500,1000) TF layers 12–17; [1000,∞) full TF
+# Progressive unfreeze (1순위, exp69–70 discard → off): [0,S1) SM only; [S1,S2) TF layers 12–17; [S2,∞) full TF
 USE_PROGRESSIVE_UNFREEZE = False
 PROG_UNFREEZE_STEP1 = 500
 PROG_UNFREEZE_STEP2 = 1000
 PROG_UNFREEZE_FIRST_TF_LAYER = 12
+
+# Overlap-aware loss (2순위): up-weight frames where ≥2 speakers active (targets > thresh)
+USE_OVERLAP_LOSS_WEIGHTING = True
+OVERLAP_LOSS_WEIGHT = 1.5
+OVERLAP_ACTIVE_THRESH = 0.5
 
 # ===================================================================
 # Extracted modules — agent can modify these
@@ -862,15 +867,25 @@ class FocalBCELoss(nn.Module):
 
     def forward(self, probs, labels, target_lens):
         eps = 1e-7
-        probs_list = [probs[k, :target_lens[k], :] for k in range(probs.shape[0])]
-        labels_list = [labels[k, :target_lens[k], :] for k in range(labels.shape[0])]
-        p = torch.cat(probs_list, dim=0)
-        y = torch.cat(labels_list, dim=0)
-        bce = -(y * torch.log(p + eps) + (1.0 - y) * torch.log(1.0 - p + eps))
-        pt = p * y + (1.0 - p) * (1.0 - y)
-        pt = pt.clamp(min=eps, max=1.0 - eps)
-        w = (1.0 - pt).pow(self.gamma)
-        return (w * bce).mean()
+        chunks = []
+        for k in range(probs.shape[0]):
+            T = int(target_lens[k].item())
+            p = probs[k, :T, :]
+            y = labels[k, :T, :]
+            bce = -(y * torch.log(p + eps) + (1.0 - y) * torch.log(1.0 - p + eps))
+            pt = p * y + (1.0 - p) * (1.0 - y)
+            pt = pt.clamp(min=eps, max=1.0 - eps)
+            w = (1.0 - pt).pow(self.gamma)
+            if USE_OVERLAP_LOSS_WEIGHTING:
+                n_act = (y > OVERLAP_ACTIVE_THRESH).to(dtype=p.dtype).sum(dim=-1, keepdim=True)
+                ow = torch.where(
+                    n_act >= 2,
+                    torch.full_like(n_act, OVERLAP_LOSS_WEIGHT),
+                    torch.ones_like(n_act),
+                )
+                w = w * ow
+            chunks.append((w * bce).reshape(-1))
+        return torch.cat(chunks, dim=0).mean()
 
 
 # ===================================================================
