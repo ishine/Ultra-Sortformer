@@ -76,7 +76,9 @@ PP_GAP_MAX_FRAMES = 6
 PP_GAP_BIN_THRESH = 0.40
 PP_GAP_BRIDGE_PROB = 0.50
 PP_AVG_SMOOTH_KERNEL = 11
-USE_ALIBI_REL_BIAS = True
+USE_ALIBI_REL_BIAS = False
+USE_ROPE = True
+ROPE_THETA = 10000.0
 
 DECORR_WEIGHT = 0.005
 
@@ -106,6 +108,27 @@ def form_attention_mask(input_mask, diagonal=None):
     return attention_mask.unsqueeze(1)
 
 
+def _apply_rope_qk(
+    q: torch.Tensor, k: torch.Tensor, theta: float
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """RoPE on last dim of q,k; shapes [B, H, T, D]."""
+    _, _, t, d = q.shape
+    if d % 2 != 0:
+        return q, k
+    device = q.device
+    dtype = q.dtype
+    inv_freq = 1.0 / (theta ** (torch.arange(0, d, 2, device=device, dtype=torch.float32) / float(d)))
+    pos = torch.arange(t, device=device, dtype=torch.float32)
+    freqs = torch.outer(pos, inv_freq)
+    cos = freqs.cos().to(dtype).view(1, 1, t, d // 2)
+    sin = freqs.sin().to(dtype).view(1, 1, t, d // 2)
+    q1, q2 = q[..., : d // 2], q[..., d // 2 :]
+    k1, k2 = k[..., : d // 2], k[..., d // 2 :]
+    q_out = torch.cat([q1 * cos - q2 * sin, q1 * sin + q2 * cos], dim=-1)
+    k_out = torch.cat([k1 * cos - k2 * sin, k1 * sin + k2 * cos], dim=-1)
+    return q_out, k_out
+
+
 # -------------------------------------------------------------------
 # MultiHeadAttention (from NeMo transformer_modules)
 # -------------------------------------------------------------------
@@ -113,17 +136,21 @@ def form_attention_mask(input_mask, diagonal=None):
 class MultiHeadAttention(nn.Module):
     def __init__(self, hidden_size, num_attention_heads,
                  attn_score_dropout=0.0, attn_layer_dropout=0.0,
-                 alibi_bias=False):
+                 alibi_bias=False, rope=False, rope_theta=10000.0):
         super().__init__()
         if hidden_size % num_attention_heads != 0:
             raise ValueError(
                 f"hidden_size ({hidden_size}) not divisible by num_attention_heads ({num_attention_heads})"
             )
+        if alibi_bias and rope:
+            raise ValueError("alibi_bias and rope cannot both be True")
         self.hidden_size = hidden_size
         self.num_attention_heads = num_attention_heads
         self.attn_head_size = hidden_size // num_attention_heads
         self.attn_scale = math.sqrt(math.sqrt(self.attn_head_size))
         self.alibi_bias = alibi_bias
+        self.rope = rope
+        self.rope_theta = rope_theta
         if alibi_bias:
             self.alibi_slope = nn.Parameter(torch.full((num_attention_heads,), 0.08))
 
@@ -144,6 +171,9 @@ class MultiHeadAttention(nn.Module):
         query = self.transpose_for_scores(self.query_net(queries)) / self.attn_scale
         key = self.transpose_for_scores(self.key_net(keys)) / self.attn_scale
         value = self.transpose_for_scores(self.value_net(values))
+
+        if self.rope:
+            query, key = _apply_rope_qk(query, key, self.rope_theta)
 
         attention_scores = torch.matmul(query, key.transpose(-1, -2))
         if self.alibi_bias:
@@ -196,13 +226,13 @@ class TransformerEncoderBlock(nn.Module):
     def __init__(self, hidden_size, inner_size, num_attention_heads=1,
                  attn_score_dropout=0.0, attn_layer_dropout=0.0,
                  ffn_dropout=0.0, hidden_act="relu", pre_ln=False,
-                 alibi_bias=False):
+                 alibi_bias=False, rope=False, rope_theta=10000.0):
         super().__init__()
         self.pre_ln = pre_ln
         self.layer_norm_1 = nn.LayerNorm(hidden_size, eps=1e-5)
         self.first_sub_layer = MultiHeadAttention(
             hidden_size, num_attention_heads, attn_score_dropout, attn_layer_dropout,
-            alibi_bias=alibi_bias,
+            alibi_bias=alibi_bias, rope=rope, rope_theta=rope_theta,
         )
         self.layer_norm_2 = nn.LayerNorm(hidden_size, eps=1e-5)
         self.second_sub_layer = PositionWiseFF(hidden_size, inner_size, ffn_dropout, hidden_act)
@@ -245,7 +275,7 @@ class TransformerEncoder(nn.Module):
                  num_attention_heads=1, attn_score_dropout=0.0,
                  attn_layer_dropout=0.0, ffn_dropout=0.0,
                  hidden_act="relu", pre_ln=False, pre_ln_final_layer_norm=True,
-                 alibi_bias=False):
+                 alibi_bias=False, rope=False, rope_theta=10000.0):
         super().__init__()
 
         if pre_ln and pre_ln_final_layer_norm:
@@ -258,7 +288,7 @@ class TransformerEncoder(nn.Module):
             hidden_size, inner_size, num_attention_heads,
             attn_score_dropout, attn_layer_dropout,
             ffn_dropout, hidden_act, pre_ln,
-            alibi_bias=alibi_bias,
+            alibi_bias=alibi_bias, rope=rope, rope_theta=rope_theta,
         )
         self.layers = nn.ModuleList([deepcopy(layer) for _ in range(num_layers)])
         self.diag = 0 if mask_future else None
@@ -999,6 +1029,8 @@ def build_custom_modules(nemo_model, src_spks=SRC_NUM_SPKS, dst_spks=NUM_SPKS):
         pre_ln=tf_cfg.get("pre_ln", False),
         pre_ln_final_layer_norm=tf_cfg.get("pre_ln_final_layer_norm", True),
         alibi_bias=USE_ALIBI_REL_BIAS,
+        rope=USE_ROPE,
+        rope_theta=ROPE_THETA,
     )
 
     tf_state = nemo_model.transformer_encoder.state_dict()
@@ -1007,6 +1039,8 @@ def build_custom_modules(nemo_model, src_spks=SRC_NUM_SPKS, dst_spks=NUM_SPKS):
         print(f"  TransformerEncoder missing keys: {missing}")
     if unexpected:
         print(f"  TransformerEncoder unexpected keys: {unexpected}")
+    if USE_ROPE:
+        print(f"  TransformerEncoder: RoPE (theta={ROPE_THETA}), ALiBi off")
 
     custom_loss = FocalBCELoss(gamma=FOCAL_GAMMA)
 
