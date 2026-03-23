@@ -333,41 +333,7 @@ Comparisons below use the NVIDIA base [`diar_streaming_sortformer_4spk-v2.1`](ht
 | Chunk size | 340 frames |
 | Batch size | 1 |
 
-### 5-speaker model (`ultra_diar_streaming_sortformer_5spk_v1.0`)
-
-#### AliMeeting (test)
-
-| Model | DER | FA | MISS | CER | Spk_Count_Acc |
-|-------|-----|----|------|-----|---------------|
-| diar_streaming_sortformer_4spk-v2.1 (base) | 11.03% | 0.40% | 9.93% | 0.70% | 95.00% |
-| ultra_diar_streaming_sortformer_5spk_v1.0 | **5.85%** | 1.03% | 3.80% | 1.01% | 65.00% |
-
-#### AMI IHM (test)
-
-| Model | DER | FA | MISS | CER | Spk_Count_Acc |
-|-------|-----|----|------|-----|---------------|
-| diar_streaming_sortformer_4spk-v2.1 (base) | 26.05% | 0.50% | 23.51% | 2.03% | 93.75% |
-| ultra_diar_streaming_sortformer_5spk_v1.0 | **10.98%** | 1.48% | 7.79% | 1.71% | 68.75% |
-
-#### AMI SDM (test)
-
-| Model | DER | FA | MISS | CER | Spk_Count_Acc |
-|-------|-----|----|------|-----|---------------|
-| diar_streaming_sortformer_4spk-v2.1 (base) | 28.29% | 0.82% | 23.76% | 3.72% | 93.75% |
-| ultra_diar_streaming_sortformer_5spk_v1.0 | **14.33%** | 2.09% | 8.33% | 3.91% | 87.50% |
-
-#### CallHome (test)
-
-| Model | eng | deu | jpn | spa | zho |
-|-------|-----|-----|-----|-----|-----|
-| diar_streaming_sortformer_4spk-v2.1 (base) DER | 4.94% | 6.70% | 10.03% | 23.27% | 7.15% |
-| ultra_diar_streaming_sortformer_5spk_v1.0 DER | 7.39% | 6.98% | 10.59% | **17.92%** | 9.24% |
-| diar_streaming_sortformer_4spk-v2.1 (base) Spk_Acc | 83.57% | 80.83% | 79.17% | 63.57% | 72.86% |
-| ultra_diar_streaming_sortformer_5spk_v1.0 Spk_Acc | **87.86%** | **86.67%** | **83.33%** | **72.14%** | 72.86% |
-
-> **Note (5spk)**: The base model is limited to 4 speakers. DER gains on AliMeeting / AMI largely come from better alignment with 5-speaker sessions; `Spk_Count_Acc` can drop where the model predicts 5 speakers on shorter clips.
-
-### 8-speaker model (`ultra_diar_streaming_sortformer_8spk_v1.0`)
+### `ultra_diar_streaming_sortformer_8spk_v1.0`
 
 Hugging Face: [devsy0117/ultra_diar_streaming_sortformer_8spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1)
 
@@ -401,7 +367,7 @@ Hugging Face: [devsy0117/ultra_diar_streaming_sortformer_8spk_v1](https://huggin
 | diar_streaming_sortformer_4spk-v2.1 (base) Spk_Acc | 83.57% | 80.83% | 79.17% | 63.57% | 72.86% |
 | ultra_diar_streaming_sortformer_8spk_v1.0 Spk_Acc | **92.86%** | **90.00%** | **89.17%** | **70.00%** | **75.00%** |
 
-> **Note (8spk)**: Extending to 8 speakers changes speaker-count behavior on low-speaker or short clips; interpret `Spk_Count_Acc` next to DER. See the model card on Hugging Face for details.
+> **Note**: Extending to 8 speakers changes speaker-count behavior on low-speaker or short clips; interpret `Spk_Count_Acc` next to DER. See the model card on Hugging Face for details.
 
 ---
 
