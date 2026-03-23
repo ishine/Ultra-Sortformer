@@ -83,6 +83,18 @@ LOCAL_ATTN_RADIUS = 0
 
 DECORR_WEIGHT = 0.005
 
+# --- Early stopping (skip bad experiments faster) ---
+EARLY_STOP_ENABLE = True
+EARLY_STOP_PATIENCE = 300
+EARLY_STOP_CHECK_AFTER = 400
+EARLY_STOP_MIN_DELTA = 1e-4
+
+# Progressive unfreeze (1순위): steps [0,500) SM only; [500,1000) TF layers 12–17; [1000,∞) full TF
+USE_PROGRESSIVE_UNFREEZE = True
+PROG_UNFREEZE_STEP1 = 500
+PROG_UNFREEZE_STEP2 = 1000
+PROG_UNFREEZE_FIRST_TF_LAYER = 12
+
 # ===================================================================
 # Extracted modules — agent can modify these
 # ===================================================================
@@ -1247,6 +1259,23 @@ def forward_streaming(encoder, transformer_encoder, sortformer_modules, processe
     return total_preds
 
 
+def apply_transformer_unfreeze_schedule(transformer_encoder: TransformerEncoder, step: int) -> None:
+    """Progressive unfreeze: SM always trainable; TF layers follow step thresholds."""
+    if not USE_PROGRESSIVE_UNFREEZE:
+        return
+    n_layers = len(transformer_encoder.layers)
+    if step < PROG_UNFREEZE_STEP1:
+        first_idx = n_layers
+    elif step < PROG_UNFREEZE_STEP2:
+        first_idx = min(PROG_UNFREEZE_FIRST_TF_LAYER, n_layers)
+    else:
+        first_idx = 0
+    for i, layer in enumerate(transformer_encoder.layers):
+        tr = i >= first_idx
+        for p in layer.parameters():
+            p.requires_grad = tr
+
+
 # ===================================================================
 # Main training script
 # ===================================================================
@@ -1320,7 +1349,24 @@ if __name__ == "__main__":
 
     # --- Setup optimizer ---
     param_groups = []
-    if N_BASE_SPKS > 0 and hasattr(custom_sm, 'single_hidden_to_spks_new'):
+    if USE_PROGRESSIVE_UNFREEZE:
+        apply_transformer_unfreeze_schedule(nemo_model.transformer_encoder, 0)
+        new_params = list(custom_sm.single_hidden_to_spks_new.parameters())
+        new_ids = {id(p) for p in new_params}
+        sm_base = [p for p in custom_sm.parameters() if id(p) not in new_ids]
+        tf_all = list(nemo_model.transformer_encoder.parameters())
+        param_groups = [
+            {"params": sm_base, "lr": LR},
+            {"params": new_params, "lr": OPTIM_NEW_LR},
+            {"params": tf_all, "lr": LR},
+        ]
+        if is_main:
+            print(
+                f"Progressive unfreeze: steps 0–{PROG_UNFREEZE_STEP1 - 1} SM only; "
+                f"{PROG_UNFREEZE_STEP1}–{PROG_UNFREEZE_STEP2 - 1} TF layers {PROG_UNFREEZE_FIRST_TF_LAYER}+; "
+                f"{PROG_UNFREEZE_STEP2}+ full TF"
+            )
+    elif N_BASE_SPKS > 0 and hasattr(custom_sm, 'single_hidden_to_spks_new'):
         new_params = list(custom_sm.single_hidden_to_spks_new.parameters())
         new_ids = {id(p) for p in new_params}
         base_params = [p for p in nemo_model.parameters() if p.requires_grad and id(p) not in new_ids]
@@ -1423,11 +1469,15 @@ if __name__ == "__main__":
     step = 0
     epoch = 0
     smooth_loss = 0.0
+    best_smooth_loss = float('inf')
+    steps_without_improvement = 0
+    early_stopped = False
     if use_ddp:
         train_sampler.set_epoch(epoch)
     data_iter = iter(train_dl)
 
     while step < FIXED_STEPS:
+        apply_transformer_unfreeze_schedule(base_model.transformer_encoder, step)
         try:
             batch = next(data_iter)
         except StopIteration:
@@ -1492,6 +1542,21 @@ if __name__ == "__main__":
                 end="", flush=True,
             )
 
+        if EARLY_STOP_ENABLE and step >= EARLY_STOP_CHECK_AFTER:
+            if debiased < best_smooth_loss - EARLY_STOP_MIN_DELTA:
+                best_smooth_loss = debiased
+                steps_without_improvement = 0
+            else:
+                steps_without_improvement += 1
+            if steps_without_improvement >= EARLY_STOP_PATIENCE:
+                if is_main:
+                    print(f"\n[Early Stop] No improvement for {EARLY_STOP_PATIENCE} steps "
+                          f"(best={best_smooth_loss:.6f}, current={debiased:.6f}). "
+                          f"Stopping at step {step}.")
+                early_stopped = True
+                step += 1
+                break
+
         step += 1
 
         if step == 1:
@@ -1501,6 +1566,10 @@ if __name__ == "__main__":
 
     if is_main:
         print()
+        if early_stopped:
+            print(f"Training early-stopped at step {step}/{FIXED_STEPS}")
+        else:
+            print(f"Training completed all {FIXED_STEPS} steps")
     t_train_end = time.time()
     training_seconds = t_train_end - t_train_start
 
