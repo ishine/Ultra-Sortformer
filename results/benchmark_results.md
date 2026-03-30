@@ -13,21 +13,21 @@ Summary of streaming Sortformer and baseline diarization models on a fixed multi
 
 ## Datasets
 
-| Dataset | Description | Language |
-|---------|-------------|----------|
-| val_2spk ~ val_8spk | Synthetic validation (2–8 speakers, 90 s, silence / overlap) | Korean |
-| alimeeting | AliMeeting meeting speech | Chinese |
-| ami_ihm_test | AMI IHM (individual headset) test | English |
-| ami_sdm_test | AMI SDM (single distant mic) test | English |
-| callhome_eng | CallHome English | English |
-| callhome_deu | CallHome German | German |
-| callhome_jpn | CallHome Japanese | Japanese |
-| callhome_spa | CallHome Spanish | Spanish |
-| callhome_zho | CallHome Chinese | Chinese |
-| kdomainconf_5spk | Meeting speech recognition by major domain — five-speaker condition; 30-session subset for diarization evaluation | Korean |
-| kdomainconf_3_4spk | Same corpus line as kdomainconf — three- to four-speaker validation split; 30-session diarization evaluation | Korean |
-| kaddress | Address and location read speech; 30-session diarization evaluation | Korean |
-| kemergency | Enhanced emergency speech and acoustic events; national emergency hotline (119) intelligent call-intake speech corpus; 30-session diarization evaluation | Korean |
+| Dataset | Description | Language | Source |
+|---------|-------------|----------|--------|
+| val_2spk ~ val_8spk | Synthetic validation (2–8 speakers, 90 s, silence / overlap) | Korean | — |
+| alimeeting | AliMeeting meeting speech | Chinese | — |
+| ami_ihm_test | AMI IHM (individual headset) test | English | — |
+| ami_sdm_test | AMI SDM (single distant mic) test | English | — |
+| callhome_eng | CallHome English | English | — |
+| callhome_deu | CallHome German | German | — |
+| callhome_jpn | CallHome Japanese | Japanese | — |
+| callhome_spa | CallHome Spanish | Spanish | — |
+| callhome_zho | CallHome Chinese | Chinese | — |
+| kdomainconf_5spk | Meeting speech recognition by major domain — five-speaker condition; 30-session subset for diarization evaluation | Korean | [AI Hub — meeting by domain](https://www.aihub.or.kr/aihubdata/data/view.do?pageIndex=1&currMenu=115&topMenu=100&srchOptnCnd=OPTNCND001&searchKeyword=%EC%A3%BC%EC%9A%94+%EC%98%81%EC%97%AD%EB%B3%84+%ED%9A%8C%EC%9D%98+%EC%9D%8C%EC%84%B1%EC%9D%B8%EC%8B%9D+%EB%8D%B0%EC%9D%B4%ED%84%B0&srchDetailCnd=DETAILCND001&srchOrder=ORDER001&srchPagePer=20&aihubDataSe=data&dataSetSn=464) |
+| kdomainconf_3_4spk | Same corpus line as kdomainconf — three- to four-speaker validation split; 30-session diarization evaluation | Korean | [AI Hub — meeting by domain](https://www.aihub.or.kr/aihubdata/data/view.do?pageIndex=1&currMenu=115&topMenu=100&srchOptnCnd=OPTNCND001&searchKeyword=%EC%A3%BC%EC%9A%94+%EC%98%81%EC%97%AD%EB%B3%84+%ED%9A%8C%EC%9D%98+%EC%9D%8C%EC%84%B1%EC%9D%B8%EC%8B%9D+%EB%8D%B0%EC%9D%B4%ED%84%B0&srchDetailCnd=DETAILCND001&srchOrder=ORDER001&srchPagePer=20&aihubDataSe=data&dataSetSn=464) |
+| kaddress | Address and location read speech; 30-session diarization evaluation | Korean | [AI Hub — address speech](https://www.aihub.or.kr/aihubdata/data/view.do?pageIndex=1&currMenu=115&topMenu=100&srchOptnCnd=OPTNCND001&searchKeyword=%EC%A3%BC%EC%86%8C%EC%9D%8C%EC%84%B1%EB%8D%B0%EC%9D%B4%ED%84%B0&srchDetailCnd=DETAILCND001&srchOrder=ORDER001&srchPagePer=20&aihubDataSe=data&dataSetSn=71556) |
+| kemergency | Enhanced emergency speech and acoustic events; national emergency hotline (119) intelligent call-intake speech corpus; 30-session diarization evaluation | Korean | [AI Hub — emergency / 119 call-intake](https://www.aihub.or.kr/aihubdata/data/view.do?pageIndex=1&currMenu=115&topMenu=100&srchOptnCnd=OPTNCND001&searchKeyword=%EC%9C%84%EA%B8%89%EC%83%81%ED%99%A9+%EC%9D%8C%EC%84%B1%2F%EC%9D%8C%ED%96%A5+%28%EA%B3%A0%EB%8F%84%ED%99%94%29+-+119+%EC%A7%80%EB%8A%A5%ED%98%95+%EC%8B%A0%EA%B3%A0%EC%A0%91%EC%88%98+%EC%9D%8C%EC%84%B1+%EC%9D%B8%EC%8B%9D+%EB%8D%B0%EC%9D%B4%ED%84%B0&srchDetailCnd=DETAILCND001&srchOrder=ORDER001&srchPagePer=20&aihubDataSe=data&dataSetSn=71768) |
 
 ## ultra_diar_streaming_sortformer_8spk_v1
 
