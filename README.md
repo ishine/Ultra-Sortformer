@@ -22,6 +22,13 @@ This repository records the **transition from a fixed 4-speaker cap to a configu
    - [Step 4: Scaling to Larger N (Example: 8 Speakers)](#step-4-scaling-to-larger-n-example-8-speakers)
 4. [Evaluation Results](#evaluation-results)
 5. [Synthetic Training Data](#synthetic-training-data)
+   - [Prerequisites](#synthesis-prerequisites)
+   - [How it differs from stock NeMo](#how-it-differs-from-stock-nemo)
+   - [Configuration](#synthesis-configuration)
+   - [CLI](#synthesis-cli)
+   - [Session length and speaker enforcement](#session-length-and-speaker-enforcement)
+   - [Outputs](#synthesis-outputs)
+   - [Example command](#synthesis-example)
 6. [Training](#training)
 7. [Requirements](#requirements)
 
@@ -220,26 +227,90 @@ For a different **N**, align `model.max_num_of_spks`, manifest labels, and `n_ba
 
 ## Synthetic Training Data
 
-All synthetic data is generated from **Korean TTS speech** using `scripts/sentence_level_multispeaker_simulator.py`, a customized version of NeMo's [`multispeaker_simulator.py`](https://github.com/NVIDIA/NeMo/blob/main/tools/speech_data_simulator/multispeaker_simulator.py). The original script was modified to operate at the **sentence level** — interleaving complete single-speaker utterances rather than splitting at the word/phoneme level — which better reflects natural conversational turn-taking. It creates multi-speaker sessions with controlled silence and overlap ratios.
+All synthetic multi-speaker sessions are built from **single-speaker Korean TTS utterances** using `scripts/sentence_level_multispeaker_simulator.py`. The tool subclasses NeMo’s [`MultiSpeakerSimulator`](https://github.com/NVIDIA/NeMo/blob/main/nemo/collections/asr/data/data_simulation.py) (same pipeline as [`multispeaker_simulator.py`](https://github.com/NVIDIA/NeMo/blob/main/tools/speech_data_simulator/multispeaker_simulator.py)): session layout, silence/overlap sampling, RTTM/JSON/CTM export, and optional augmentations follow NeMo’s `data_simulator.yaml`. Only **`_build_sentence`** is overridden so each “sentence” is built from **whole manifest rows** (full utterances), not word- or sub-word chunks—closer to natural turn-taking than the stock simulator.
 
 ### Source Data
 
-Single-speaker utterances are sourced from the **[다화자 음성합성 데이터 (Multi-speaker Speech Synthesis Dataset)](https://www.aihub.or.kr/aihubdata/data/view.do?aihubDataSe=data&dataSetSn=542)** provided by [AI-Hub](https://www.aihub.or.kr) (한국지능정보사회진흥원, NIA). This dataset contains recordings from 3,400+ Korean speakers across diverse age groups (10s–60s), totaling 10,152 hours of speech.
+Single-speaker utterances come from the **[다화자 음성합성 데이터 (Multi-speaker Speech Synthesis Dataset)](https://www.aihub.or.kr/aihubdata/data/view.do?aihubDataSe=data&dataSetSn=542)** on [AI-Hub](https://www.aihub.or.kr) (NIA). It spans 3,400+ Korean speakers (10s–60s), ~10k hours.
 
-| Source | #Utterances | Language |
-|--------|-------------|----------|
+| Split | Approx. #Utterances | Language |
+|--------|---------------------|----------|
 | `multispeaker_speech_synthesis_data/Training` | 8,666,803 | Korean |
 | `multispeaker_speech_synthesis_data/Validation` | 1,225,244 | Korean |
 
-### Generated Datasets
+Build a **NeMo-style JSON manifest** listing `audio_filepath`, `speaker` (or compatible id), and optionally `text`, `words`, `alignments` for labels. The simulator groups rows by speaker id to sample per turn.
 
-Two overlap variants were generated for 2–8 speakers to study robustness to overlapping speech:
+### Synthesis prerequisites
 
-- **`ov0.05`** — 1,000 training sessions × 2–8 spk (180s), 100 validation sessions × 2–8 spk (90s), ~5% overlap
-- **`ov0.15`** — 1,000 training sessions × 2–8 spk (180s), ~15% overlap (harder conditions)
+1. **Clone NeMo** next to this repo (sibling path), so `Ultra-Sortformer/NeMo` exists—the script prepends that tree to `sys.path` and loads `tools/speech_data_simulator/conf/data_simulator.yaml` by default.
+2. **Install** NeMo ASR stack (see [Requirements](#requirements)), plus system packages if needed (`libsndfile1`, `ffmpeg`).
+3. The script sets **`CUDA_VISIBLE_DEVICES=""`** so generation runs on **CPU only** (avoids driver/PyTorch CUDA mismatches on headless or older drivers). It is slower than GPU but predictable across environments.
 
-All sessions use ~10% mean silence. Overlap and silence ratios are means; individual sessions vary (std ~9–10%).
+### How it differs from stock NeMo
 
+| Aspect | Stock `MultiSpeakerSimulator` | `SentenceLevelMultiSpeakerSimulator` |
+|--------|------------------------------|--------------------------------------|
+| Turn content | Word-aligned slices; reads audio in chunks up to `max_audio_read_sec` | One or more **entire** utterances per turn (mono, resampled to `sr`) |
+| Turn length cap | Word-count target from `sentence_length_params` | **`max_sentences_per_turn`**: uniform **1…N** utterances per turn (CLI default **N = 3**). If unset in YAML and not overridden, falls back to negative binomial on **utterance count** (often too long—prefer explicit **N**) |
+| Optional YAML | Same | `session_params.max_turn_duration_sec` caps samples per turn when set |
+
+### Synthesis configuration
+
+- **Base config**: `NeMo/tools/speech_data_simulator/conf/data_simulator.yaml` (or pass `--config_file`).
+- Important YAML knobs (not all exposed on CLI):
+  - `session_config.{num_speakers,num_sessions,session_length}` — target speakers per session, session count, **nominal** duration in **seconds**.
+  - `session_params.{mean_silence,mean_overlap,...}` — global silence/overlap **means** (per-session values vary).
+  - `speaker_enforcement.enforce_num_speakers` — if `true`, NeMo may **continue past `session_length`** and **pad** the waveform until every speaker has spoken; real duration can exceed `session_length`. Set `enforce_num_speakers: false` in YAML if you need a hard cap at the cost of possibly missing speakers in a session.
+  - `sr`, `outputs.output_filename`, augmentors, background noise, etc. — unchanged from NeMo.
+
+### Synthesis CLI
+
+| Argument | Role |
+|----------|------|
+| `--manifest_filepath` | Input NeMo JSON manifest (single-speaker rows with speaker id). |
+| `--output_dir` | Output directory for `.wav`, `.rttm`, `.json`, `params.yaml`, etc. |
+| `--config_file` | Optional override YAML (defaults to NeMo’s `data_simulator.yaml`). |
+| `--num_speakers` | Override `session_config.num_speakers`. |
+| `--num_sessions` | Override `session_config.num_sessions`. |
+| `--session_length` | Override nominal session length (**seconds**). |
+| `--mean_silence` | Session mean silence ratio in **[0, 1)**. |
+| `--mean_overlap` | Session mean overlap ratio in **[0, 1)**; invalid `mean_overlap_var` is clamped for stability. |
+| `--max_sentences_per_turn` / `--max_sent` | Max utterances concatenated in one speaker turn; each run draws **uniformly from 1…N** (default **N = 3**). |
+
+### Session length and speaker enforcement
+
+`session_length` is a **target** timeline length in samples (`session_length × sr`). With **`enforce_num_speakers: true`** (NeMo default), the generator can **extend** the buffer so late speakers still get turns. For utterance-level simulation, combine **`--max_sent`** (small **N**) with YAML tuning (`enforce_num_speakers`, optional `max_turn_duration_sec`) if you need durations close to the nominal cap.
+
+### Synthesis outputs
+
+Per session index `i`: `multispeaker_session_i.wav`, `multispeaker_session_i.rttm`, `multispeaker_session_i.json` (and CTM if enabled), plus a copied **`params.yaml`** under `--output_dir`. Use your own manifest-merge scripts (e.g. `scripts/merge_synthetic_manifests.py`) to build training/validation JSON for NeMo diarization.
+
+### Synthesis example
+
+From the repository root (with `NeMo` installed and discoverable as above):
+
+```bash
+python scripts/sentence_level_multispeaker_simulator.py \
+  --manifest_filepath /path/to/manifest.json \
+  --output_dir /path/to/synthetic_run \
+  --num_speakers 8 \
+  --num_sessions 1000 \
+  --session_length 180 \
+  --mean_silence 0.10 \
+  --mean_overlap 0.05 \
+  --max_sent 3
+```
+
+Adjust paths, speaker count, session count, and overlap/silence means to match your experiment grid.
+
+### Generated datasets (this project)
+
+Two overlap regimes were used for **2–8 speakers**:
+
+- **`ov0.05`** — 1,000 training sessions × 2–8 spk (180 s nominal), 100 validation sessions × 2–8 spk (90 s nominal), ~5% mean overlap  
+- **`ov0.15`** — 1,000 training sessions × 2–8 spk (180 s), ~15% mean overlap (harder)
+
+~10% mean silence in both grids. Reported silence/overlap are **means**; per-session stats vary (e.g. std ~9–10% for overlap in aggregate).
 
 ---
 
