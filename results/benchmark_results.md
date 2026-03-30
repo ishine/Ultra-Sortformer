@@ -2,6 +2,18 @@
 
 Summary of streaming Sortformer and baseline diarization models on a fixed multi-dataset evaluation protocol. **Lower DER is better.** Rankings use **total (real)** DER (real-world corpora only; synthetic `val_*` splits excluded from that aggregate).
 
+## Evaluation parameters
+
+| Parameter | Value |
+|-----------|-------|
+| Post-processing | None |
+| Collar | 0.25s |
+| Ignore overlap | False |
+| Chunk size | 340 frames |
+| Batch size | 1 |
+
+## Ranking (by total real DER)
+
 | Rank | Model | total DER | total Spk_Count_Acc | total (real) DER | total (real) Spk_Count_Acc |
 |------|-------|-----------|---------------------|------------------|---------------------------|
 | 1 | ultra_diar_streaming_sortformer_8spk_v1 | 9.40% | 76.75% | 13.53% | 72.77% |
@@ -11,11 +23,24 @@ Summary of streaming Sortformer and baseline diarization models on a fixed multi
 
 ---
 
+## Synthetic validation splits (`val_2spk` … `val_8spk`)
+
+These rows are **synthetic multi-speaker sessions** (90 s, controlled silence and overlap) built for diarization evaluation. Single-speaker Korean utterances are drawn from the AI Hub **[Multi-speaker Speech Synthesis dataset](https://www.aihub.or.kr/aihubdata/data/view.do?aihubDataSe=data&dataSetSn=542)** (NIA), then mixed with the project’s **sentence-level** multispeaker simulator (NeMo [`multispeaker_simulator`](https://github.com/NVIDIA/NeMo/blob/main/tools/speech_data_simulator/multispeaker_simulator.py)-style pipeline, sentence-level turn-taking).
+
+| Source (AI Hub corpus) | Utterances | Language |
+|------------------------|------------|----------|
+| `multispeaker_speech_synthesis_data/Training` | 8,666,803 | Korean |
+| `multispeaker_speech_synthesis_data/Validation` | 1,225,244 | Korean |
+
+Training-side variants in this repo include overlap settings such as **`ov0.05`** (~5% mean overlap) and **`ov0.15`** (~15%); validation sessions used in these tables follow the same simulation recipe. See the repository README **Synthetic Training Data** for session counts and overlap details.
+
+---
+
 ## Datasets
 
 | Dataset | Description | Language | Source |
 |---------|-------------|----------|--------|
-| val_2spk ~ val_8spk | Synthetic validation (2–8 speakers, 90 s, silence / overlap) | Korean | — |
+| val_2spk ~ val_8spk | Synthetic validation (2–8 speakers, 90 s, silence / overlap); see *Synthetic validation splits* above | Korean | [AI Hub — multi-speaker speech synthesis](https://www.aihub.or.kr/aihubdata/data/view.do?aihubDataSe=data&dataSetSn=542) |
 | alimeeting | AliMeeting meeting speech | Chinese | — |
 | ami_ihm_test | AMI IHM (individual headset) test | English | — |
 | ami_sdm_test | AMI SDM (single distant mic) test | English | — |
