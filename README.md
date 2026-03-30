@@ -195,7 +195,7 @@ These experiments served as an architectural analysis tool; no layer-expanded mo
 The **8-speaker** model starts from the NVIDIA **4spk** checkpoint, extends the Sortformer output head with the same orthogonal / split-layer pipeline as above, and is **fine-tuned** with split learning rates (`~1e-5` base, `~1e-4` on new head parameters) on mixed synthetic + real meeting data.
 
 - **Hugging Face**: [devsy0117/ultra_diar_streaming_sortformer_8spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1)  
-- **Weights**: `ultra_diar_streaming_sortformer_8spk_v1.0.nemo` (same checkpoint as the Hub release)
+- **Weights**: `ultra_diar_streaming_sortformer_8spk_v1.nemo` (same checkpoint as the Hub release)
 
 Example training command shape (paths and manifests depend on your setup):
 
@@ -242,9 +242,9 @@ All sessions use ~10% mean silence. Overlap and silence ratios are means; indivi
 
 ## Evaluation Results
 
-Comparisons below use the NVIDIA base [`diar_streaming_sortformer_4spk-v2.1`](https://huggingface.co/nvidia/diar_streaming_sortformer_4spk-v2.1).
+Head-to-head metrics for **ultra_diar_streaming_sortformer_8spk_v1**, **ultra_diar_streaming_sortformer_5spk_v1**, NVIDIA [`diar_streaming_sortformer_4spk-v2.1`](https://huggingface.co/nvidia/diar_streaming_sortformer_4spk-v2.1), and **pyannote(mago_mstudio)** — per-dataset DER / FA / MISS / CER / Spk_Count_Acc, synthetic `val_*` splits, AMI / AliMeeting / CallHome, Korean eval corpora (with AI Hub source links), and **total / total (real)** rankings — live in **[`results/benchmark_results.md`](results/benchmark_results.md)** as the single benchmark document.
 
-### Evaluation Parameters
+### Evaluation parameters
 
 | Parameter | Value |
 |-----------|-------|
@@ -254,39 +254,7 @@ Comparisons below use the NVIDIA base [`diar_streaming_sortformer_4spk-v2.1`](ht
 | Chunk size | 340 frames |
 | Batch size | 1 |
 
-### `ultra_diar_streaming_sortformer_8spk_v1.0`
-
-#### AliMeeting (test)
-
-| Model | DER | FA | MISS | CER | Spk_Count_Acc |
-|-------|-----|----|------|-----|---------------|
-| diar_streaming_sortformer_4spk-v2.1 (base) | 11.03% | 0.40% | 9.93% | 0.70% | 95.00% |
-| ultra_diar_streaming_sortformer_8spk_v1.0 | **5.69%** | 1.12% | 3.89% | 0.68% | 100.00% |
-
-#### AMI IHM (test)
-
-| Model | DER | FA | MISS | CER | Spk_Count_Acc |
-|-------|-----|----|------|-----|---------------|
-| diar_streaming_sortformer_4spk-v2.1 (base) | 26.05% | 0.50% | 23.51% | 2.03% | 93.75% |
-| ultra_diar_streaming_sortformer_8spk_v1.0 | **10.87%** | 1.53% | 7.89% | 1.44% | 81.25% |
-
-#### AMI SDM (test)
-
-| Model | DER | FA | MISS | CER | Spk_Count_Acc |
-|-------|-----|----|------|-----|---------------|
-| diar_streaming_sortformer_4spk-v2.1 (base) | 28.29% | 0.82% | 23.76% | 3.72% | 93.75% |
-| ultra_diar_streaming_sortformer_8spk_v1.0 | **15.61%** | 2.33% | 8.23% | 5.05% | 75.00% |
-
-#### CallHome (test)
-
-| Model | eng | deu | jpn | spa | zho |
-|-------|-----|-----|-----|-----|-----|
-| diar_streaming_sortformer_4spk-v2.1 (base) DER | 4.94% | 6.70% | 10.03% | 23.27% | 7.15% |
-| ultra_diar_streaming_sortformer_8spk_v1.0 DER | 8.20% | 7.70% | 11.11% | **18.24%** | 10.16% |
-| diar_streaming_sortformer_4spk-v2.1 (base) Spk_Acc | 83.57% | 80.83% | 79.17% | 63.57% | 72.86% |
-| ultra_diar_streaming_sortformer_8spk_v1.0 Spk_Acc | **92.86%** | **90.00%** | **89.17%** | **70.00%** | **75.00%** |
-
-> **Note**: Extending to 8 speakers changes speaker-count behavior on low-speaker or short clips; interpret `Spk_Count_Acc` next to DER. See the model card on Hugging Face for details.
+> **Note**: Extending to more speakers changes speaker-count behavior on low-speaker or short clips; interpret `Spk_Count_Acc` alongside DER. See the Hugging Face model cards for discussion.
 
 ---
 
