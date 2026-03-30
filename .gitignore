@@ -4,6 +4,10 @@ results/*
 !results/*.md
 sortformer_autoresearch/
 
+# scripts: only sentence_level_multispeaker_simulator.py is tracked
+scripts/*
+!scripts/sentence_level_multispeaker_simulator.py
+
 # ===== 데이터 (대용량) =====
 data/
 synthetic_data/

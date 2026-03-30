@@ -283,7 +283,7 @@ Build a **NeMo-style JSON manifest** listing `audio_filepath`, `speaker` (or com
 
 ### Synthesis outputs
 
-Per session index `i`: `multispeaker_session_i.wav`, `multispeaker_session_i.rttm`, `multispeaker_session_i.json` (and CTM if enabled), plus a copied **`params.yaml`** under `--output_dir`. Use your own manifest-merge scripts (e.g. `scripts/merge_synthetic_manifests.py`) to build training/validation JSON for NeMo diarization.
+Per session index `i`: `multispeaker_session_i.wav`, `multispeaker_session_i.rttm`, `multispeaker_session_i.json` (and CTM if enabled), plus a copied **`params.yaml`** under `--output_dir`. Merge session manifests into NeMo diarization train/val JSON with your own tooling (this repository only ships `scripts/sentence_level_multispeaker_simulator.py` under `scripts/`).
 
 ### Synthesis example
 
