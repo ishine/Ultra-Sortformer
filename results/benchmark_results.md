@@ -24,10 +24,10 @@ Summary of streaming Sortformer and baseline diarization models on a fixed multi
 | callhome_jpn | CallHome Japanese | Japanese |
 | callhome_spa | CallHome Spanish | Spanish |
 | callhome_zho | CallHome Chinese | Chinese |
-| kdomainconf_5spk | 주요 영역별 회의 음성인식 데이터 (5화자): meeting ASR by major domain — five-speaker split; 30-sample diarization eval | Korean |
-| kdomainconf_3_4spk | Same corpus family — three- to four-speaker validation split; 30-sample diarization eval | Korean |
-| kaddress | 주소 음성 데이터: address / location read speech; 30-sample diarization eval | Korean |
-| kemergency | 위급상황 음성/음향 (고도화) — 119 지능형 신고접수 음성 인식 데이터: enhanced emergency speech & sounds; intelligent emergency-call intake ASR; 30-sample diarization eval | Korean |
+| kdomainconf_5spk | Meeting speech recognition by major domain — five-speaker condition; 30-session subset for diarization evaluation | Korean |
+| kdomainconf_3_4spk | Same corpus line as kdomainconf — three- to four-speaker validation split; 30-session diarization evaluation | Korean |
+| kaddress | Address and location read speech; 30-session diarization evaluation | Korean |
+| kemergency | Enhanced emergency speech and acoustic events; national emergency hotline (119) intelligent call-intake speech corpus; 30-session diarization evaluation | Korean |
 
 ## ultra_diar_streaming_sortformer_8spk_v1
 
