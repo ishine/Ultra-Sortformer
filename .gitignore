@@ -2,6 +2,7 @@
 # results: ignore artifacts; allow benchmark markdown under results/
 results/*
 !results/*.md
+CHANGELOG.md
 sortformer_autoresearch/
 
 # scripts: only sentence_level_multispeaker_simulator.py is tracked
