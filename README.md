@@ -3,11 +3,11 @@
 [![5spk Model on Hugging Face](https://huggingface.co/datasets/huggingface/badges/resolve/main/model-on-hf-md.svg)](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_5spk_v1)
 [![8spk Model on Hugging Face](https://huggingface.co/datasets/huggingface/badges/resolve/main/model-on-hf-md.svg)](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1)
 
-This project extends **NVIDIA's Streaming Sortformer** speaker diarization from the **4-speaker** baseline to **5- and 8-speaker** models. The approach is to expand the output layer with **orthogonal initialization**, then **fine-tune** with **split learning rates** so existing behavior stays stable while new speaker dimensions are learned.
+This repository records the **transition from a fixed 4-speaker cap to a configurable N-speaker Streaming Sortformer** (**N > 4**). The pattern is always the same: grow the speaker head with **SVD-based orthogonal initialization**, keep **base vs. new** weights in separate modules, and **fine-tune with split learning rates** so behavior on 2–4 speaker audio stays stable while the extra dimensions learn. You can target any **N** supported by your data and VRAM; we publish checkpoints for **N = 5** and **N = 8** as reference points.
 
 **Released models (Hugging Face)**  
-- [ultra_diar_streaming_sortformer_5spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_5spk_v1) — up to 5 speakers  
-- [ultra_diar_streaming_sortformer_8spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1) — up to 8 speakers (4→8 extension + training)
+- [ultra_diar_streaming_sortformer_5spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_5spk_v1) — **N = 5**  
+- [ultra_diar_streaming_sortformer_8spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1) — **N = 8** (four new head dimensions on top of the 4-spk base)
 
 ---
 
@@ -16,10 +16,10 @@ This project extends **NVIDIA's Streaming Sortformer** speaker diarization from 
 1. [Background](#background)
 2. [Architecture Overview](#architecture-overview)
 3. [Extension Journey](#extension-journey)
-   - [Step 1: Output Layer Extension (4 → 5spk)](#step-1-output-layer-extension-4--5spk)
+   - [Step 1: Output Layer Extension (4 → N)](#step-1-output-layer-extension-4--n)
    - [Step 2: Split Learning Rate Training](#step-2-split-learning-rate-training)
    - [Step 3: Layer Expansion Experiments](#step-3-layer-expansion-experiments)
-   - [Step 4: Extending to 8 Speakers](#step-4-extending-to-8-speakers)
+   - [Step 4: Scaling to Larger N (Example: 8 Speakers)](#step-4-scaling-to-larger-n-example-8-speakers)
 4. [Evaluation Results](#evaluation-results)
 5. [Synthetic Training Data](#synthetic-training-data)
 6. [Training](#training)
@@ -29,13 +29,13 @@ This project extends **NVIDIA's Streaming Sortformer** speaker diarization from 
 
 ## Background
 
-NVIDIA's [diar_streaming_sortformer_4spk-v2.1](https://huggingface.co/nvidia/diar_streaming_sortformer_4spk-v2.1) is a streaming speaker diarization model based on the Sortformer architecture. It uses a **FastConformer encoder** (17 layers) followed by a **Transformer encoder** (18 layers) to produce per-frame speaker activity predictions. The final output layer is a single linear layer mapping from hidden states to N speaker probabilities.
+NVIDIA's [diar_streaming_sortformer_4spk-v2.1](https://huggingface.co/nvidia/diar_streaming_sortformer_4spk-v2.1) is a streaming speaker diarization model based on the Sortformer architecture. It uses a **FastConformer encoder** (17 layers) followed by a **Transformer encoder** (18 layers) to produce per-frame speaker activity predictions. The final output layer is a single linear mapping from hidden states to **four** speaker probabilities.
 
-The model is capable of real-time streaming diarization using a chunk-based speaker cache mechanism.
+The model supports real-time streaming diarization with a chunk-based speaker cache.
 
-**Problem**: The model is hard-limited to 4 speakers. Any audio with 5+ speakers gets misidentified.
+**Problem**: The public checkpoint is **hard-limited to four simultaneous speakers**. Scenes with more talkers are handled poorly once you only relabel data without widening the head.
 
-**Goal**: Extend the model to handle 5, 6, and 8 speakers while preserving performance on the original 2–4 speaker scenarios.
+**Goal**: Make **`max_num_of_spks = N` with N > 4** a first-class training target, without sacrificing the 2–4 speaker regime. This README walks through the mechanics; concrete runs in the repo use **N = 5** (smallest jump) and **N = 8** (larger jump from the same base).
 
 ---
 
@@ -75,67 +75,66 @@ Audio Input
   Per-frame speaker activity predictions  [batch, time, N_spk]
 ```
 
-The output layer `single_hidden_to_spks` is a simple `nn.Linear(192, N_spk)`. Extending the model to handle more speakers means expanding this layer from N to M outputs.
+The output layer `single_hidden_to_spks` is `nn.Linear(192, N_spk)`. Moving from the stock **N_spk = 4** model to **N_spk = N** means adding **N − 4** rows (or more generally **N_new** rows when extending from any **N_base**).
 
 ---
 
 ## Extension Journey
 
-### Step 1: Output Layer Extension (4 → 5spk)
+### Step 1: Output Layer Extension (4 → N)
 
 **Script**: `scripts/extend_output_layer.py`
 
-The naive approach — random weight initialization for new speaker neurons — catastrophically degrades performance on existing speakers. Instead, we use **SVD-based orthogonal initialization**.
+We treat the baseline as **N_base = 4** speakers and grow the matrix to **N = N_base + N_new**. The first shipped milestone is **N = 5** (**N_new = 1**); the **N = 8** model adds **N_new = 4** rows in one shot with the same procedure.
+
+Random initialization for the new rows **destroys** accuracy on existing speakers. We instead use **SVD-based orthogonal initialization** so new logits start orthogonal to the subspace spanned by the original weights.
 
 #### How it works
 
-Given the existing weight matrix `W ∈ ℝ^{N×H}` (N speakers, H=192 hidden dims):
+Let the existing weight matrix be `W ∈ ℝ^{N_base×H}` (H = 192):
 
 ```python
 # SVD decomposition of existing weights
 U, S, Vh = torch.linalg.svd(W, full_matrices=True)
 
-# New speaker neurons = right singular vectors orthogonal to existing ones
-# Vh[N], Vh[N+1], ... are orthogonal to the column space of W
-new_row = Vh[N]  # fully orthogonal to existing N speakers
+# New speaker rows = right singular directions beyond the first N_base
+# Vh[N_base], Vh[N_base+1], ... are orthogonal to the row space of W
+new_row = Vh[N_base]  # first new speaker; repeat indexing for additional speakers
 
-# Normalize to match existing neuron norms
+# Normalize to match typical row norms
 avg_norm = W.norm(dim=1).mean()
 new_row = new_row * (avg_norm / new_row.norm())
 ```
 
-This ensures new speaker neurons start as far as possible from existing ones in the representation space, minimizing interference during fine-tuning.
+Repeat for each new speaker index until the head reaches the target **N**.
 
-The extended model is saved in **split mode** for differential learning rates:
+The extended checkpoint is saved in **split** form so optimizers can treat base and new rows differently:
 
 ```
-single_hidden_to_spks_base  (N_base speakers)   ← preserved weights
-single_hidden_to_spks_new   (N_new speakers)    ← new/extended weights
+single_hidden_to_spks_base  (N_base speakers)   ← frozen / low LR
+single_hidden_to_spks_new   (N_new speakers)    ← higher LR
 ```
 
 ---
 
 ### Step 2: Split Learning Rate Training
 
-**Key Insight**: When fine-tuning the extended model, using the same learning rate for all output neurons causes the model to "forget" its existing 2–4 speaker accuracy while trying to learn the 5th speaker.
+**Key insight**: A **single** learning rate on the whole expanded head tends to **erase** the old 2–4 speaker solution while the new dimensions still fit.
 
-#### The Problem
+#### What we saw early on
 
-Early experiments showed that after fine-tuning with a uniform learning rate:
-- val_2spk → val_4spk: accuracy degraded significantly
-- The model started predicting 5 speakers on 3–4 speaker audio
+- Synthetic **val_2spk–val_4spk** quality dropped under uniform LR.
+- The network **over-used** the new capacity (e.g., predicting the full trained **N** on 3–4 speaker clips).
 
-#### The Solution: Differential Learning Rates
+#### Mitigation: differential learning rates
 
-We split the output layer and apply different learning rates:
+| Component | Learning rate | Role |
+|-----------|---------------|------|
+| `single_hidden_to_spks_base` (speakers 1…N_base) | `1e-5` | Preserve the pretrained head |
+| `single_hidden_to_spks_new` (added speakers) | `1e-4` | Faster adaptation on new dimensions |
+| Rest of the model | `1e-5` | Standard fine-tuning |
 
-| Component | Learning Rate | Reason |
-|-----------|-------------|--------|
-| `single_hidden_to_spks_base` (spks 1–N) | `1e-5` | Preserve existing knowledge |
-| `single_hidden_to_spks_new` (spk N+1) | `1e-4` | 10× higher: fast adaptation |
-| All other parameters | `1e-5` | Normal fine-tuning |
-
-This is implemented by overriding `setup_optimizer_param_groups` in `sortformer_diar_models.py`:
+Implemented via `setup_optimizer_param_groups` in `sortformer_diar_models.py`:
 
 ```python
 def setup_optimizer_param_groups(self):
@@ -153,7 +152,7 @@ def setup_optimizer_param_groups(self):
         ]
 ```
 
-#### Training Command (5spk example)
+#### Training command example (**N = 5**)
 
 ```bash
 python NeMo/examples/speaker_tasks/diarization/neural_diarizer/streaming_sortformer_diar_train.py \
@@ -171,6 +170,8 @@ python NeMo/examples/speaker_tasks/diarization/neural_diarizer/streaming_sortfor
   batch_size=4 \
   trainer.devices=2
 ```
+
+Set `model.max_num_of_spks` and `n_base_spks` to match your **target N** and **how many rows you keep in `base`**.
 
 ---
 
@@ -190,14 +191,14 @@ These experiments served as an architectural analysis tool; no layer-expanded mo
 
 ---
 
-### Step 4: Extending to 8 Speakers
+### Step 4: Scaling to Larger N (Example: 8 Speakers)
 
-The **8-speaker** model starts from the NVIDIA **4spk** checkpoint, extends the Sortformer output head with the same orthogonal / split-layer pipeline as above, and is **fine-tuned** with split learning rates (`~1e-5` base, `~1e-4` on new head parameters) on mixed synthetic + real meeting data.
+The **N = 8** release uses the **same pipeline**: start from NVIDIA **4-spk**, extend the Sortformer head with orthogonal / split weights (**N_base = 4**, **N_new = 4**), then fine-tune with **~1e-5** on the bulk of parameters and **~1e-4** on `single_hidden_to_spks_new` on mixed synthetic + real meeting data.
 
 - **Hugging Face**: [devsy0117/ultra_diar_streaming_sortformer_8spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1)  
-- **Weights**: `ultra_diar_streaming_sortformer_8spk_v1.nemo` (same checkpoint as the Hub release)
+- **Weights**: `ultra_diar_streaming_sortformer_8spk_v1.nemo` (same artifact as the Hub upload)
 
-Example training command shape (paths and manifests depend on your setup):
+Example command shape for **N = 8** (paths and manifests are environment-specific):
 
 ```bash
 python NeMo/examples/speaker_tasks/diarization/neural_diarizer/streaming_sortformer_diar_train.py \
@@ -212,6 +213,8 @@ python NeMo/examples/speaker_tasks/diarization/neural_diarizer/streaming_sortfor
   exp_manager.name=sortformer_8spk_run \
   exp_manager.exp_dir=/path/to/logs
 ```
+
+For a different **N**, align `model.max_num_of_spks`, manifest labels, and `n_base_spks` with your expansion checkpoint.
 
 ---
 
@@ -279,7 +282,7 @@ Key YAML settings (`configs/streaming_sortformer_diarizer_4spk-v2.yaml`):
 
 ```yaml
 model:
-  max_num_of_spks: 6       # Set to target speaker count
+  max_num_of_spks: 6       # Set to your target N
   lr: 1e-5                 # Base learning rate
   # optim_new_lr: 1e-4     # Add via CLI: +model.optim_new_lr=1e-4
 
