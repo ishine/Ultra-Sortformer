@@ -1,5 +1,7 @@
 # ===== 원격 제외 (로컬만 유지) =====
-results/
+# results: ignore artifacts; allow benchmark markdown under results/
+results/*
+!results/*.md
 scripts/
 sortformer_autoresearch/
 
