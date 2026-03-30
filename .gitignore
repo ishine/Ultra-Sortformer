@@ -1,14 +1,14 @@
+# ===== 원격 제외 (로컬만 유지) =====
+results/
+scripts/
+sortformer_autoresearch/
+
 # ===== 데이터 (대용량) =====
 data/
 synthetic_data/
 output/
 temp/
 test/
-
-# results: JSON/MD 결과 파일 제외, 시각화 이미지만 포함
-results/*.json
-results/*.md
-results/*.txt
 
 # ===== 모델 (대용량) =====
 *.nemo
