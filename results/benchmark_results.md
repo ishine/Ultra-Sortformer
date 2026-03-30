@@ -24,10 +24,10 @@ Summary of streaming Sortformer and baseline diarization models on a fixed multi
 | callhome_jpn | CallHome Japanese | Japanese |
 | callhome_spa | CallHome Spanish | Spanish |
 | callhome_zho | CallHome Chinese | Chinese |
-| 주요 영역별 회의 음성인식 데이터 5화자 | Meeting ASR by major domain — five speakers; 30-sample diarization test split | Korean |
-| 주요 영역별 회의 음성인식 데이터 3–4화자 | Same series — three to four speakers; 30-sample validation split | Korean |
-| 주소 음성 데이터 | Address read-speech; 30-sample diarization eval | Korean |
-| 위급상황 음성/음향 (고도화) - 119 지능형 신고접수 음성 인식 데이터 | Enhanced emergency speech/sounds; 119 intelligent call-intake ASR; 30-sample diarization eval | Korean |
+| kdomainconf_5spk | 주요 영역별 회의 음성인식 데이터 (5화자): meeting ASR by major domain — five-speaker split; 30-sample diarization eval | Korean |
+| kdomainconf_3_4spk | Same corpus family — three- to four-speaker validation split; 30-sample diarization eval | Korean |
+| kaddress | 주소 음성 데이터: address / location read speech; 30-sample diarization eval | Korean |
+| kemergency | 위급상황 음성/음향 (고도화) — 119 지능형 신고접수 음성 인식 데이터: enhanced emergency speech & sounds; intelligent emergency-call intake ASR; 30-sample diarization eval | Korean |
 
 ## ultra_diar_streaming_sortformer_8spk_v1
 
@@ -50,10 +50,10 @@ Checkpoint: `streaming_sortformer_diar_train/sortformer_8spk_from4_splitlr_v4/ch
 | callhome_jpn | 5.65% | 3.50% | 1.96% | 11.11% | 89.17% |
 | callhome_spa | 5.85% | 7.06% | 5.33% | 18.24% | 70.00% |
 | callhome_zho | 6.14% | 1.41% | 2.61% | 10.16% | 75.00% |
-| 주요 영역별 회의 음성인식 데이터 5화자 | 6.59% | 3.26% | 7.13% | 16.98% | 23.33% |
-| 주요 영역별 회의 음성인식 데이터 3–4화자 | 7.28% | 3.82% | 10.37% | 21.47% | 23.33% |
-| 주소 음성 데이터 | 0.00% | 6.67% | 0.22% | 6.89% | 60.00% |
-| 위급상황 음성/음향 (고도화) - 119 지능형 신고접수 음성 인식 데이터 | 15.55% | 11.32% | 2.57% | 29.43% | 93.33% |
+| kdomainconf_5spk | 6.59% | 3.26% | 7.13% | 16.98% | 23.33% |
+| kdomainconf_3_4spk | 7.28% | 3.82% | 10.37% | 21.47% | 23.33% |
+| kaddress | 0.00% | 6.67% | 0.22% | 6.89% | 60.00% |
+| kemergency | 15.55% | 11.32% | 2.57% | 29.43% | 93.33% |
 | **total** | - | - | - | **9.40%** | **76.75%** |
 | **total (real)** | - | - | - | **13.53%** | **72.77%** |
 
@@ -79,10 +79,10 @@ Checkpoint: `streaming_sortformer_diar_train/sortformer_5spk_splitlr_1e5_1e4/che
 | callhome_jpn | 4.47% | 4.35% | 1.77% | 10.59% | 83.33% |
 | callhome_spa | 5.25% | 7.58% | 5.09% | 17.92% | 72.14% |
 | callhome_zho | 5.39% | 1.58% | 2.26% | 9.24% | 72.86% |
-| 주요 영역별 회의 음성인식 데이터 5화자 | 6.06% | 3.48% | 7.85% | 17.39% | 46.67% |
-| 주요 영역별 회의 음성인식 데이터 3–4화자 | 6.84% | 3.34% | 11.52% | 21.70% | 36.67% |
-| 주소 음성 데이터 | 0.00% | 7.74% | 0.00% | 7.74% | 100.00% |
-| 위급상황 음성/음향 (고도화) - 119 지능형 신고접수 음성 인식 데이터 | 15.64% | 11.28% | 5.33% | 32.26% | 100.00% |
+| kdomainconf_5spk | 6.06% | 3.48% | 7.85% | 17.39% | 46.67% |
+| kdomainconf_3_4spk | 6.84% | 3.34% | 11.52% | 21.70% | 36.67% |
+| kaddress | 0.00% | 7.74% | 0.00% | 7.74% | 100.00% |
+| kemergency | 15.64% | 11.28% | 5.33% | 32.26% | 100.00% |
 | **total** | - | - | - | **11.53%** | **66.81%** |
 | **total (real)** | - | - | - | **13.53%** | **75.62%** |
 
@@ -108,10 +108,10 @@ Checkpoint: `diar_streaming_sortformer_4spk-v2.1/diar_streaming_sortformer_4spk-
 | callhome_jpn | 1.69% | 6.71% | 1.63% | 10.03% | 79.17% |
 | callhome_spa | 2.75% | 18.76% | 1.76% | 23.27% | 63.57% |
 | callhome_zho | 1.45% | 4.43% | 1.27% | 7.15% | 72.86% |
-| 주요 영역별 회의 음성인식 데이터 5화자 | 2.96% | 11.65% | 13.23% | 27.84% | 0.00% |
-| 주요 영역별 회의 음성인식 데이터 3–4화자 | 3.19% | 11.44% | 11.09% | 25.73% | 70.00% |
-| 주소 음성 데이터 | 0.00% | 10.79% | 0.00% | 10.79% | 100.00% |
-| 위급상황 음성/음향 (고도화) - 119 지능형 신고접수 음성 인식 데이터 | 6.72% | 12.54% | 2.40% | 21.67% | 93.33% |
+| kdomainconf_5spk | 2.96% | 11.65% | 13.23% | 27.84% | 0.00% |
+| kdomainconf_3_4spk | 3.19% | 11.44% | 11.09% | 25.73% | 70.00% |
+| kaddress | 0.00% | 10.79% | 0.00% | 10.79% | 100.00% |
+| kemergency | 6.72% | 12.54% | 2.40% | 21.67% | 93.33% |
 | **total** | - | - | - | **21.98%** | **62.03%** |
 | **total (real)** | - | - | - | **16.96%** | **77.15%** |
 
@@ -137,9 +137,9 @@ Artifact: `models/mstudio/speaker_diarization/m-dia` (pyannote-based Mago MStudi
 | callhome_jpn | 1.94% | 13.50% | 11.88% | 27.32% | 40.83% |
 | callhome_spa | 2.93% | 14.33% | 7.63% | 24.89% | 47.86% |
 | callhome_zho | 2.54% | 6.93% | 9.78% | 19.25% | 50.71% |
-| 주요 영역별 회의 음성인식 데이터 5화자 | 2.58% | 10.45% | 2.66% | 15.69% | 50.00% |
-| 주요 영역별 회의 음성인식 데이터 3–4화자 | 3.59% | 9.95% | 7.70% | 21.24% | 40.00% |
-| 주소 음성 데이터 | 0.10% | 11.72% | 2.55% | 14.37% | 93.33% |
-| 위급상황 음성/음향 (고도화) - 119 지능형 신고접수 음성 인식 데이터 | 5.70% | 15.91% | 8.43% | 30.04% | 56.67% |
+| kdomainconf_5spk | 2.58% | 10.45% | 2.66% | 15.69% | 50.00% |
+| kdomainconf_3_4spk | 3.59% | 9.95% | 7.70% | 21.24% | 40.00% |
+| kaddress | 0.10% | 11.72% | 2.55% | 14.37% | 93.33% |
+| kemergency | 5.70% | 15.91% | 8.43% | 30.04% | 56.67% |
 | **total** | - | - | - | **22.90%** | **41.01%** |
 | **total (real)** | - | - | - | **19.00%** | **48.27%** |
