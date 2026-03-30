@@ -24,10 +24,10 @@ Summary of streaming Sortformer and baseline diarization models on a fixed multi
 | callhome_jpn | CallHome Japanese | Japanese |
 | callhome_spa | CallHome Spanish | Spanish |
 | callhome_zho | CallHome Chinese | Chinese |
-| kdomainconf_test30 | kdomainconf 5-speaker, 30 samples | Korean |
-| kdomainconf_val_3_4spk_test30 | kdomainconf validation 3–4 speakers, 30 samples | Korean |
-| kaddress_test30 | kaddress read speech, 30 samples | Korean |
-| kemergency_test30 | kemergency domain, 30 samples | Korean |
+| kdomainconf_test30 | Meeting speech recognition by major domain — 5-speaker subset (30-sample test set) | Korean |
+| kdomainconf_val_3_4spk_test30 | Same corpus, validation split — 3–4 speakers (30 samples) | Korean |
+| kaddress_test30 | Address / location speech data (30 samples) | Korean |
+| kemergency_test30 | Emergency speech and acoustic events (refined); Korean “119” intelligent emergency-call ASR corpus (30 samples) | Korean |
 
 ## ultra_diar_streaming_sortformer_8spk_v1
 
