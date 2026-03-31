@@ -18,8 +18,7 @@ This repository records the **transition from a fixed 4-speaker cap to a configu
 3. [Extension Journey](#extension-journey)
    - [Step 1: Output Layer Extension (4 → N)](#step-1-output-layer-extension-4--n)
    - [Step 2: Split Learning Rate Training](#step-2-split-learning-rate-training)
-   - [Step 3: Layer Expansion Experiments](#step-3-layer-expansion-experiments)
-   - [Step 4: Scaling to Larger N (Example: 8 Speakers)](#step-4-scaling-to-larger-n-example-8-speakers)
+   - [Step 3: Scaling to Larger N (Example: 8 Speakers)](#step-3-scaling-to-larger-n-example-8-speakers)
 4. [Evaluation Results](#evaluation-results)
 5. [Synthetic Training Data](#synthetic-training-data)
    - [Prerequisites](#synthesis-prerequisites)
@@ -82,7 +81,7 @@ Audio Input
   Per-frame speaker activity predictions  [batch, time, N_spk]
 ```
 
-The diagram shows the **stock** layout: one `single_hidden_to_spks` linear, `nn.Linear(192, N_spk)`. After extension in this repo, checkpoints use **`single_hidden_to_spks_base`** and **`single_hidden_to_spks_new`** (same total width **N_spk**, split for differential learning rates; see Step 1–2). Moving from NVIDIA’s **N_spk = 4** head to **N_spk = N** means adding **N − 4** rows (or **N_new** rows when extending from any **N_base**).
+**Stock:** one `single_hidden_to_spks` (`Linear(192, N_spk)`). **This repo (extended):** `single_hidden_to_spks_base` + `single_hidden_to_spks_new` for split LR (Step 1–2). **4 → N** speakers means **N − 4** new rows (or **N_new** from any **N_base**).
 
 ---
 
@@ -112,8 +111,6 @@ new_row = Vh[N_base]  # first new speaker; repeat indexing for additional speake
 avg_norm = W.norm(dim=1).mean()
 new_row = new_row * (avg_norm / new_row.norm())
 ```
-
-*The SVD story above is **intuition**: new rows are built from singular-vector directions of `W` so added logits start largely complementary to the existing head. It is not a formal subspace-orthogonality proof.*
 
 Repeat for each new speaker index until the head reaches the target **N**.
 
@@ -163,36 +160,20 @@ def setup_optimizer_param_groups(self):
 
 ---
 
-### Step 3: Layer Expansion Experiments
-
-Inspired by [dnhkng's RYS-XLarge](https://github.com/dnhkng/GlitchHunter) — which reportedly reached #1 on the Open LLM Leaderboard at the time of that work, by duplicating middle layers of Qwen2-72B without weight modification — we experimented with **layer repeat** and **permanent layer duplication** on Sortformer's 18-layer Transformer encoder.
-
-**Scripts**: `scripts/layer_repeat_experiment.py`, `scripts/expand_transformer_layers.py`
-
-We ran layer repeat (re-executing a block [i, j] twice) across all (start, end) combinations on 65 real-world test samples, and also tested permanent duplication of blocks like L8-9, L14-17. Key observations:
-
-- **Layers 0–7** handle acoustic encoding; **layers 8–9** are the core diarization reasoning block (most sensitive to modification); **layers 14–17** drive speaker count judgment.
-- **L14-17 duplication** dramatically boosted Speaker Count Accuracy on real-world data (e.g., AMI IHM: 43.75% → 87.50%), but increased DER without fine-tuning.
-- Layer expansion without subsequent fine-tuning reliably increases MISS at the junction between original and copied blocks.
-
-These experiments served as an architectural analysis tool; no layer-expanded models were used for final training.
-
----
-
-### Step 4: Scaling to Larger N (Example: 8 Speakers)
+### Step 3: Scaling to Larger N (Example: 8 Speakers)
 
 The **N = 8** release uses the **same pipeline**: start from NVIDIA **4-spk**, extend the Sortformer head with orthogonal / split weights (**N_base = 4**, **N_new = 4**), then fine-tune with **~1e-5** on the bulk of parameters and **~1e-4** on `single_hidden_to_spks_new` on mixed synthetic + real meeting data.
 
 - **Hugging Face**: [devsy0117/ultra_diar_streaming_sortformer_8spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1)  
 - **Weights**: `ultra_diar_streaming_sortformer_8spk_v1.nemo` (same artifact as the Hub upload)
 
-For a different **N**, align `model.max_num_of_spks`, training manifests, and `n_base_spks` with your expansion checkpoint and patched NeMo setup (see [Training](#training)).
+Other **N**: keep `max_num_of_spks`, manifests, and `n_base_spks` consistent with your checkpoint; NeMo patches are listed under [Training](#training).
 
 ---
 
 ## Synthetic Training Data
 
-All synthetic multi-speaker sessions are built from **single-speaker Korean TTS utterances** using `scripts/sentence_level_multispeaker_simulator.py`. The tool subclasses NeMo’s [`MultiSpeakerSimulator`](https://github.com/NVIDIA/NeMo/blob/main/nemo/collections/asr/data/data_simulation.py) (same pipeline as [`multispeaker_simulator.py`](https://github.com/NVIDIA/NeMo/blob/main/tools/speech_data_simulator/multispeaker_simulator.py)): session layout, silence/overlap sampling, RTTM/JSON/CTM export, and optional augmentations follow NeMo’s `data_simulator.yaml`. Only **`_build_sentence`** is overridden so each “sentence” is built from **whole manifest rows** (full utterances), not word- or sub-word chunks—closer to natural turn-taking than the stock simulator.
+**`scripts/sentence_level_multispeaker_simulator.py`** subclasses NeMo’s [`MultiSpeakerSimulator`](https://github.com/NVIDIA/NeMo/blob/main/nemo/collections/asr/data/data_simulation.py) (same idea as [`multispeaker_simulator.py`](https://github.com/NVIDIA/NeMo/blob/main/tools/speech_data_simulator/multispeaker_simulator.py)) and keeps NeMo’s `data_simulator.yaml` session pipeline. **`_build_sentence`** only is overridden: turns use **whole manifest utterances**, not word-aligned slices.
 
 ### Source Data
 
@@ -209,7 +190,7 @@ Build a **NeMo-style JSON manifest** listing `audio_filepath`, `speaker` (or com
 
 1. **Install NeMo** (see [Requirements](#requirements)). The simulator imports `nemo` from your environment; it looks for `NeMo/tools/speech_data_simulator/conf/data_simulator.yaml` **only if** a sibling `NeMo/` directory exists next to this repo. If you use a **pip-only** install, pass `--config_file` pointing to that YAML (e.g. from a checkout or a copied file).
 2. **System audio libraries**: `libsndfile1` and `ffmpeg` (listed under Requirements) are required for decoding/writing audio in practice.
-3. The script sets **`CUDA_VISIBLE_DEVICES=""`** so generation runs on **CPU only** (avoids driver/PyTorch CUDA mismatches on headless or older drivers). It is slower than GPU but predictable across environments.
+3. Generation forces **CPU** (`CUDA_VISIBLE_DEVICES=""`) for stable runs without a working GPU stack.
 
 ### How it differs from stock NeMo
 
@@ -276,7 +257,7 @@ Synthetic grids for **2–8 speakers** used two mean-overlap settings: **`ov0.05
 
 ## Evaluation Results
 
-Head-to-head metrics for **ultra_diar_streaming_sortformer_8spk_v1**, **ultra_diar_streaming_sortformer_5spk_v1**, NVIDIA [`diar_streaming_sortformer_4spk-v2.1`](https://huggingface.co/nvidia/diar_streaming_sortformer_4spk-v2.1), and **pyannote(mago_mstudio)** — per-dataset DER / FA / MISS / CER / Spk_Count_Acc, synthetic `val_*` splits, AMI / AliMeeting / CallHome, Korean eval corpora (with AI Hub source links), and **total / total (real)** rankings — live in **[`results/benchmark_results.md`](results/benchmark_results.md)** as the single benchmark document.
+Benchmark tables (our 5spk/8spk vs NVIDIA 4spk, pyannote, DER / FA / MISS / CER / Spk_Count_Acc, synthetic and real sets): **[`results/benchmark_results.md`](results/benchmark_results.md)**.
 
 ### Evaluation parameters
 
@@ -294,11 +275,9 @@ Head-to-head metrics for **ultra_diar_streaming_sortformer_8spk_v1**, **ultra_di
 
 ## Training
 
-These changes are **not** in upstream NVIDIA NeMo as of typical `main` installs. To reproduce split-head checkpoints and differential learning rates, apply the edits below to your NeMo source tree (or use a fork that already includes them).
+Upstream NeMo does **not** ship the split head / split LR below—patch your checkout (or use a fork that includes the same edits).
 
 ### NeMo Modifications
-
-This project requires modifications to NeMo's Sortformer implementation:
 
 **`nemo/collections/asr/models/sortformer_diar_models.py`**
 - Added `setup_optimizer_param_groups()` override for differential learning rates
@@ -308,8 +287,7 @@ This project requires modifications to NeMo's Sortformer implementation:
 
 ### Training Configuration
 
-Key model settings (same keys as in NeMo’s example config  
-`examples/speaker_tasks/diarization/conf/neural_diarizer/streaming_sortformer_diarizer_4spk-v2.yaml` inside a NeMo checkout):
+Example keys (see also NeMo `examples/speaker_tasks/diarization/conf/neural_diarizer/streaming_sortformer_diarizer_4spk-v2.yaml`):
 
 ```yaml
 model:
@@ -339,18 +317,18 @@ pip install Cython packaging
 pip install "git+https://github.com/NVIDIA/NeMo.git@main#egg=nemo_toolkit[asr]"
 ```
 
-**What this covers:** NeMo ASR stack from `main`, including typical dependencies such as PyTorch-related packages as required by NeMo’s install. It replaces a separate `git clone` + `pip install -e NeMo/[asr]` for **importing** NeMo in Python.
+**Note:** `pip` NeMo from NVIDIA does not include the [Training](#training) patches (`n_base_spks`, split head, optimizer groups).
 
-**Ultra-Sortformer / split head:** A plain `pip install` from NVIDIA NeMo does **not** include `n_base_spks`, the split output layers (`single_hidden_to_spks_base` / `_new`), or the `setup_optimizer_param_groups` behavior described under [Training](#training). Match this repo’s training or checkpoints only after applying those NeMo changes (or using an equivalent fork).
-
-**Not included above (add if you need them):**
+**Optional extras:**
 
 - **`pyannote.metrics`** — used for DER / benchmark-style evaluation in this project’s docs and scripts.
 - **`librosa`** — only if your own preprocessing or tooling uses it.
-- **Sibling `NeMo/` clone** — optional but convenient for examples that reference `NeMo/examples/...` paths and for the default `data_simulator.yaml` path used by `sentence_level_multispeaker_simulator.py` (or always pass `--config_file`).
+- **Sibling `NeMo/` clone** — handy for `NeMo/examples/...` and default `data_simulator.yaml`; otherwise pass `--config_file` to the simulator.
 
 ---
 
 ## License
 
-**Model checkpoints** published from this work (e.g. on Hugging Face) are derivatives of NVIDIA Sortformer and fall under the [NVIDIA Open Model License](https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-open-model-license/).
+**Source code** in this repository: **Apache License 2.0** — see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE).
+
+**Model checkpoints** on Hugging Face (fine-tuned from NVIDIA Sortformer) are also subject to the [NVIDIA Open Model License](https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-open-model-license/).

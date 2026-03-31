@@ -1,0 +1,7 @@
+Ultra-Sortformer
+
+Copyright 2026 LilDevsy0117
+
+This project's original source code is licensed under Apache License, Version 2.0
+(see LICENSE). Model checkpoints fine-tuned from NVIDIA Sortformer are subject to
+the NVIDIA Open Model License; see Hugging Face model cards.
