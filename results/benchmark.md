@@ -56,8 +56,6 @@ Training-side variants in this repo include overlap settings such as **`ov0.05`*
 
 ## ultra_diar_streaming_sortformer_8spk_v1
 
-Checkpoint: `streaming_sortformer_diar_train/sortformer_8spk_from4_splitlr_v4/checkpoints/sortformer_8spk_from4_splitlr_v4.nemo`
-
 | dataset | FA | MISS | CER | DER | Spk_Count_Acc |
 |---------|-----|------|-----|-----|---------------|
 | val_2spk | 0.01% | 0.04% | 0.04% | 0.09% | 99.00% |
@@ -84,8 +82,6 @@ Checkpoint: `streaming_sortformer_diar_train/sortformer_8spk_from4_splitlr_v4/ch
 
 
 ## ultra_diar_streaming_sortformer_5spk_v1
-
-Checkpoint: `streaming_sortformer_diar_train/sortformer_5spk_splitlr_1e5_1e4/checkpoints/sortformer_5spk_splitlr_1e5_1e4.nemo`
 
 | dataset | FA | MISS | CER | DER | Spk_Count_Acc |
 |---------|-----|------|-----|-----|---------------|
@@ -114,8 +110,6 @@ Checkpoint: `streaming_sortformer_diar_train/sortformer_5spk_splitlr_1e5_1e4/che
 
 ## diar_streaming_sortformer_4spk-v2.1
 
-Checkpoint: `diar_streaming_sortformer_4spk-v2.1/diar_streaming_sortformer_4spk-v2.1.nemo`
-
 | dataset | FA | MISS | CER | DER | Spk_Count_Acc |
 |---------|-----|------|-----|-----|---------------|
 | val_2spk | 0.00% | 15.21% | 0.05% | 15.26% | 100.00% |
@@ -143,7 +137,7 @@ Checkpoint: `diar_streaming_sortformer_4spk-v2.1/diar_streaming_sortformer_4spk-
 
 ## pyannote(mago_mstudio)
 
-Artifact: `models/mstudio/speaker_diarization/m-dia` (pyannote-based Mago MStudio pipeline)
+Pyannote-based Mago MStudio diarization pipeline.
 
 | dataset | FA | MISS | CER | DER | Spk_Count_Acc |
 |---------|-----|------|-----|-----|---------------|
