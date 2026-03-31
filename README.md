@@ -159,27 +159,6 @@ def setup_optimizer_param_groups(self):
         ]
 ```
 
-#### Training command example (**N = 5**)
-
-```bash
-python NeMo/examples/speaker_tasks/diarization/neural_diarizer/streaming_sortformer_diar_train.py \
-  --config-path=/path/to/conf \
-  --config-name=streaming_sortformer_diarizer_4spk-v2.yaml \
-  +init_from_nemo_model=diar_streaming_sortformer_5spk_orthogonal.nemo \
-  model.train_ds.manifest_filepath=/path/to/train.json \
-  model.validation_ds.manifest_filepath=/path/to/val.json \
-  model.train_ds.session_len_sec=180 \
-  model.validation_ds.session_len_sec=180 \
-  model.max_num_of_spks=5 \
-  +model.sortformer_modules.n_base_spks=4 \
-  model.lr=1e-5 \
-  +model.optim_new_lr=1e-4 \
-  batch_size=4 \
-  trainer.devices=2
-```
-
-Set `model.max_num_of_spks` and `n_base_spks` to match your **target N** and **how many rows you keep in `base`**.
-
 ---
 
 ### Step 3: Layer Expansion Experiments
@@ -205,23 +184,7 @@ The **N = 8** release uses the **same pipeline**: start from NVIDIA **4-spk**, e
 - **Hugging Face**: [devsy0117/ultra_diar_streaming_sortformer_8spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1)  
 - **Weights**: `ultra_diar_streaming_sortformer_8spk_v1.nemo` (same artifact as the Hub upload)
 
-Example command shape for **N = 8** (paths and manifests are environment-specific):
-
-```bash
-python NeMo/examples/speaker_tasks/diarization/neural_diarizer/streaming_sortformer_diar_train.py \
-  --config-path=/path/to/conf/neural_diarizer \
-  --config-name=streaming_sortformer_diarizer_4spk-v2.yaml \
-  +init_from_nemo_model=/path/to/prior_8spk_checkpoint.nemo \
-  model.train_ds.manifest_filepath=/path/to/train.json \
-  model.validation_ds.manifest_filepath=/path/to/val.json \
-  +model.sortformer_modules.n_base_spks=4 \
-  model.lr=1e-5 \
-  +model.optim_new_lr=1e-4 \
-  exp_manager.name=sortformer_8spk_run \
-  exp_manager.exp_dir=/path/to/logs
-```
-
-For a different **N**, align `model.max_num_of_spks`, manifest labels, and `n_base_spks` with your expansion checkpoint.
+For a different **N**, align `model.max_num_of_spks`, training manifests, and `n_base_spks` with your expansion checkpoint and patched NeMo setup (see [Training](#training)).
 
 ---
 
@@ -355,11 +318,11 @@ Key YAML settings (`configs/streaming_sortformer_diarizer_4spk-v2.yaml`):
 model:
   max_num_of_spks: 6       # Set to your target N
   lr: 1e-5                 # Base learning rate
-  # optim_new_lr: 1e-4     # Add via CLI: +model.optim_new_lr=1e-4
+  # optim_new_lr: 1e-4     # Higher LR for single_hidden_to_spks_new (split-head fine-tuning)
 
   sortformer_modules:
     num_spks: ${model.max_num_of_spks}
-    # n_base_spks: 5       # Add via CLI: +model.sortformer_modules.n_base_spks=5
+    # n_base_spks: 4       # Base speaker count when using split output layers
 ```
 
 ---
