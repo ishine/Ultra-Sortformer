@@ -275,6 +275,18 @@ Upstream NeMo does **not** ship the split head / split LR below—patch your che
 **`nemo/collections/asr/modules/sortformer_modules.py`**
 - Added `n_base_spks` parameter to enable split output layers (`single_hidden_to_spks_base` + `single_hidden_to_spks_new`)
 
+### What we froze (ablation)
+
+We compared three setups using NeMo’s `freeze_encoder` / `freeze_transformer_encoder` flags on the **Fast Conformer encoder** (`encoder.*`) and **Transformer encoder** (`transformer_encoder.*`):
+
+| Setup | Conformer encoder | Transformer encoder |
+|-------|-------------------|---------------------|
+| Encoder frozen | frozen | trainable |
+| Encoder + Transformer frozen | frozen | frozen |
+| Full fine-tuning | trainable | trainable |
+
+**Full fine-tuning** gave the smoothest, most reliable **training loss decrease**, so the released Ultra-Sortformer runs use **no freezing** (both stacks trainable), together with the split speaker head and split LR above.
+
 ### Training Configuration
 
 Example keys (see also NeMo `examples/speaker_tasks/diarization/conf/neural_diarizer/streaming_sortformer_diarizer_4spk-v2.yaml`):
