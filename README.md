@@ -302,9 +302,6 @@ This project requires modifications to NeMo's Sortformer implementation:
 **`nemo/collections/asr/modules/sortformer_modules.py`**
 - Added `n_base_spks` parameter to enable split output layers (`single_hidden_to_spks_base` + `single_hidden_to_spks_new`)
 
-**`nemo/collections/asr/data/audio_to_diar_label.py`**
-- Fixed `_eesd_train_collate_fn` to handle mixed 1D/2D (mono/stereo) audio tensors in batches
-
 ### Training Configuration
 
 Key YAML settings (`configs/streaming_sortformer_diarizer_4spk-v2.yaml`):
