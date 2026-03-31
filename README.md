@@ -19,7 +19,7 @@ This repository records the **transition from a fixed 4-speaker cap to a configu
    - [Step 1: Output Layer Extension (4 → N)](#step-1-output-layer-extension-4--n)
    - [Step 2: Split Learning Rate Training](#step-2-split-learning-rate-training)
    - [Step 3: Scaling to Larger N (Example: 8 Speakers)](#step-3-scaling-to-larger-n-example-8-speakers)
-4. [Evaluation Results](#evaluation-results)
+4. [Benchmark](#benchmark)
 5. [Synthetic Training Data](#synthetic-training-data)
    - [Prerequisites](#synthesis-prerequisites)
    - [How it differs from stock NeMo](#how-it-differs-from-stock-nemo)
@@ -255,21 +255,11 @@ Synthetic grids for **2–8 speakers** used two mean-overlap settings: **`ov0.05
 
 ---
 
-## Evaluation Results
+## Benchmark
 
-Benchmark tables (our 5spk/8spk vs NVIDIA 4spk, pyannote, DER / FA / MISS / CER / Spk_Count_Acc, synthetic and real sets): **[`results/benchmark_results.md`](results/benchmark_results.md)**.
+Tables and evaluation protocol: **[`results/benchmark_results.md`](results/benchmark_results.md)**.
 
-### Evaluation parameters
-
-| Parameter | Value |
-|-----------|-------|
-| Post-processing | None |
-| Collar | 0.25s |
-| Ignore overlap | False |
-| Chunk size | 340 frames |
-| Batch size | 1 |
-
-> **Note**: Extending to more speakers changes speaker-count behavior on low-speaker or short clips; interpret `Spk_Count_Acc` alongside DER. See the Hugging Face model cards for discussion.
+> **Note**: More speakers can shift speaker-count behavior on short or low-speaker clips; read `Spk_Count_Acc` next to DER. Model cards on Hugging Face have more context.
 
 ---
 
