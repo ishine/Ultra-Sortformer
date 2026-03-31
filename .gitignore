@@ -10,7 +10,9 @@ scripts/*
 !scripts/sentence_level_multispeaker_simulator.py
 
 # ===== 데이터 (대용량) =====
-data/
+data/*
+!data/multispeaker_session.wav
+!data/multispeaker_session.rttm
 synthetic_data/
 output/
 temp/
