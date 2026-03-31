@@ -329,6 +329,4 @@ pip install "git+https://github.com/NVIDIA/NeMo.git@main#egg=nemo_toolkit[asr]"
 
 ## License
 
-**Source code** in this repository: **Apache License 2.0** — see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE).
-
-**Model checkpoints** on Hugging Face (fine-tuned from NVIDIA Sortformer) are also subject to the [NVIDIA Open Model License](https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-open-model-license/).
+Apache License 2.0 — see [`LICENSE`](LICENSE).
