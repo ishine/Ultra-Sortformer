@@ -242,8 +242,8 @@ Build a **NeMo-style JSON manifest** listing `audio_filepath`, `speaker` (or com
 
 ### Synthesis prerequisites
 
-1. **Clone NeMo** next to this repo (sibling path), so `Ultra-Sortformer/NeMo` exists—the script prepends that tree to `sys.path` and loads `tools/speech_data_simulator/conf/data_simulator.yaml` by default.
-2. **Install** NeMo ASR stack (see [Requirements](#requirements)), plus system packages if needed (`libsndfile1`, `ffmpeg`).
+1. **Install NeMo** (see [Requirements](#requirements)). The simulator imports `nemo` from your environment; it looks for `NeMo/tools/speech_data_simulator/conf/data_simulator.yaml` **only if** a sibling `NeMo/` directory exists next to this repo. If you use a **pip-only** install, pass `--config_file` pointing to that YAML (e.g. from a checkout or a copied file).
+2. **System audio libraries**: `libsndfile1` and `ffmpeg` (listed under Requirements) are required for decoding/writing audio in practice.
 3. The script sets **`CUDA_VISIBLE_DEVICES=""`** so generation runs on **CPU only** (avoids driver/PyTorch CUDA mismatches on headless or older drivers). It is slower than GPU but predictable across environments.
 
 ### How it differs from stock NeMo
@@ -366,16 +366,26 @@ model:
 
 ## Requirements
 
-```bash
-# NeMo (clone separately, ~5.9GB)
-git clone https://github.com/NVIDIA/NeMo.git
-pip install -e NeMo/[asr]
+System packages (Debian/Ubuntu; use `sudo` if you are not root):
 
-# Other dependencies
-pip install torch torchaudio
-pip install soundfile librosa
-pip install pyannote.metrics
+```bash
+sudo apt-get update && sudo apt-get install -y libsndfile1 ffmpeg
 ```
+
+Python (recommended: a fresh virtual environment). `nemo_toolkit[asr]` pulls in PyTorch and most ASR dependencies declared by NeMo; install a **CUDA-enabled PyTorch wheel first** from [pytorch.org](https://pytorch.org) if you train or run on GPU.
+
+```bash
+pip install Cython packaging
+pip install "git+https://github.com/NVIDIA/NeMo.git@main#egg=nemo_toolkit[asr]"
+```
+
+**What this covers:** NeMo ASR stack from `main`, including typical dependencies such as PyTorch-related packages as required by NeMo’s install. It replaces a separate `git clone` + `pip install -e NeMo/[asr]` for **importing** NeMo in Python.
+
+**Not included above (add if you need them):**
+
+- **`pyannote.metrics`** — used for DER / benchmark-style evaluation in this project’s docs and scripts.
+- **`librosa`** — only if your own preprocessing or tooling uses it.
+- **Sibling `NeMo/` clone** — optional but convenient for examples that reference `NeMo/examples/...` paths and for the default `data_simulator.yaml` path used by `sentence_level_multispeaker_simulator.py` (or always pass `--config_file`).
 
 ---
 
