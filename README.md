@@ -354,5 +354,3 @@ pip install "git+https://github.com/NVIDIA/NeMo.git@main#egg=nemo_toolkit[asr]"
 ## License
 
 **Model checkpoints** published from this work (e.g. on Hugging Face) are derivatives of NVIDIA Sortformer and fall under the [NVIDIA Open Model License](https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-open-model-license/).
-
-**Attribution**: Based on work by NVIDIA Corporation.
