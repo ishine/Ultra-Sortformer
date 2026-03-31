@@ -268,12 +268,7 @@ Adjust paths, speaker count, session count, and overlap/silence means to match y
 
 ### Generated datasets (this project)
 
-Two overlap regimes were used for **2–8 speakers**:
-
-- **`ov0.05`** — 1,000 training sessions × 2–8 spk (180 s nominal), 100 validation sessions × 2–8 spk (90 s nominal), ~5% mean overlap  
-- **`ov0.15`** — 1,000 training sessions × 2–8 spk (180 s), ~15% mean overlap (harder)
-
-~10% mean silence in both grids. Reported silence/overlap are **means**; per-session stats vary (e.g. std ~9–10% for overlap in aggregate).
+Synthetic grids for **2–8 speakers** used two mean-overlap settings: **`ov0.05`** (~5%) and **`ov0.15`** (~15%, harder). Both used comparable mean silence (~10%); overlap and silence are **session means**, so per-session values vary.
 
 ---
 
