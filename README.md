@@ -82,7 +82,7 @@ Audio Input
   Per-frame speaker activity predictions  [batch, time, N_spk]
 ```
 
-The output layer `single_hidden_to_spks` is `nn.Linear(192, N_spk)`. Moving from the stock **N_spk = 4** model to **N_spk = N** means adding **N − 4** rows (or more generally **N_new** rows when extending from any **N_base**).
+The diagram shows the **stock** layout: one `single_hidden_to_spks` linear, `nn.Linear(192, N_spk)`. After extension in this repo, checkpoints use **`single_hidden_to_spks_base`** and **`single_hidden_to_spks_new`** (same total width **N_spk**, split for differential learning rates; see Step 1–2). Moving from NVIDIA’s **N_spk = 4** head to **N_spk = N** means adding **N − 4** rows (or **N_new** rows when extending from any **N_base**).
 
 ---
 
@@ -112,6 +112,8 @@ new_row = Vh[N_base]  # first new speaker; repeat indexing for additional speake
 avg_norm = W.norm(dim=1).mean()
 new_row = new_row * (avg_norm / new_row.norm())
 ```
+
+*The SVD story above is **intuition**: new rows are built from singular-vector directions of `W` so added logits start largely complementary to the existing head. It is not a formal subspace-orthogonality proof.*
 
 Repeat for each new speaker index until the head reaches the target **N**.
 
@@ -163,7 +165,7 @@ def setup_optimizer_param_groups(self):
 
 ### Step 3: Layer Expansion Experiments
 
-Inspired by [dnhkng's RYS-XLarge](https://github.com/dnhkng/GlitchHunter) — which reached #1 on the Open LLM Leaderboard by duplicating middle layers of Qwen2-72B without any weight modification — we experimented with **layer repeat** and **permanent layer duplication** on Sortformer's 18-layer Transformer encoder.
+Inspired by [dnhkng's RYS-XLarge](https://github.com/dnhkng/GlitchHunter) — which reportedly reached #1 on the Open LLM Leaderboard at the time of that work, by duplicating middle layers of Qwen2-72B without weight modification — we experimented with **layer repeat** and **permanent layer duplication** on Sortformer's 18-layer Transformer encoder.
 
 **Scripts**: `scripts/layer_repeat_experiment.py`, `scripts/expand_transformer_layers.py`
 
@@ -292,6 +294,8 @@ Head-to-head metrics for **ultra_diar_streaming_sortformer_8spk_v1**, **ultra_di
 
 ## Training
 
+These changes are **not** in upstream NVIDIA NeMo as of typical `main` installs. To reproduce split-head checkpoints and differential learning rates, apply the edits below to your NeMo source tree (or use a fork that already includes them).
+
 ### NeMo Modifications
 
 This project requires modifications to NeMo's Sortformer implementation:
@@ -304,7 +308,8 @@ This project requires modifications to NeMo's Sortformer implementation:
 
 ### Training Configuration
 
-Key YAML settings (`configs/streaming_sortformer_diarizer_4spk-v2.yaml`):
+Key model settings (same keys as in NeMo’s example config  
+`examples/speaker_tasks/diarization/conf/neural_diarizer/streaming_sortformer_diarizer_4spk-v2.yaml` inside a NeMo checkout):
 
 ```yaml
 model:
@@ -336,6 +341,8 @@ pip install "git+https://github.com/NVIDIA/NeMo.git@main#egg=nemo_toolkit[asr]"
 
 **What this covers:** NeMo ASR stack from `main`, including typical dependencies such as PyTorch-related packages as required by NeMo’s install. It replaces a separate `git clone` + `pip install -e NeMo/[asr]` for **importing** NeMo in Python.
 
+**Ultra-Sortformer / split head:** A plain `pip install` from NVIDIA NeMo does **not** include `n_base_spks`, the split output layers (`single_hidden_to_spks_base` / `_new`), or the `setup_optimizer_param_groups` behavior described under [Training](#training). Match this repo’s training or checkpoints only after applying those NeMo changes (or using an equivalent fork).
+
 **Not included above (add if you need them):**
 
 - **`pyannote.metrics`** — used for DER / benchmark-style evaluation in this project’s docs and scripts.
@@ -346,6 +353,6 @@ pip install "git+https://github.com/NVIDIA/NeMo.git@main#egg=nemo_toolkit[asr]"
 
 ## License
 
-This model is a derivative of NVIDIA Sortformer, licensed under the [NVIDIA Open Model License](https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-open-model-license/).
+**Model checkpoints** published from this work (e.g. on Hugging Face) are derivatives of NVIDIA Sortformer and fall under the [NVIDIA Open Model License](https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-open-model-license/).
 
 **Attribution**: Based on work by NVIDIA Corporation.
