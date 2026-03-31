@@ -257,7 +257,7 @@ Synthetic grids for **2–8 speakers** used two mean-overlap settings: **`ov0.05
 
 ## Benchmark
 
-Tables and evaluation protocol: **[`results/benchmark_results.md`](results/benchmark_results.md)**.
+Tables and evaluation protocol: **[`results/benchmark.md`](results/benchmark.md)**.
 
 > **Note**: More speakers can shift speaker-count behavior on short or low-speaker clips; read `Spk_Count_Acc` next to DER. Model cards on Hugging Face have more context.
 
