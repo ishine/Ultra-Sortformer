@@ -9,6 +9,7 @@ sortformer_autoresearch/
 scripts/*
 !scripts/sentence_level_multispeaker_simulator.py
 !scripts/inference.py
+!scripts/extend_output_layer.py
 
 # ===== 데이터 (대용량) =====
 data/*
