@@ -7,7 +7,7 @@ This repository records the **transition from a fixed 4-speaker cap to a configu
 
 **Released models (Hugging Face)**  
 - [ultra_diar_streaming_sortformer_5spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_5spk_v1) — **N = 5**  
-- [ultra_diar_streaming_sortformer_8spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1) — **N = 8** (four new head dimensions on top of the 4-spk base)
+- [ultra_diar_streaming_sortformer_8spk_v1](https://huggingface.co/devsy0117/ultra_diar_streaming_sortformer_8spk_v1) — **N = 8**
 
 ---
 
@@ -283,7 +283,7 @@ Build a **NeMo-style JSON manifest** listing `audio_filepath`, `speaker` (or com
 
 ### Synthesis outputs
 
-Per session index `i`: `multispeaker_session_i.wav`, `multispeaker_session_i.rttm`, `multispeaker_session_i.json` (and CTM if enabled), plus a copied **`params.yaml`** under `--output_dir`. Merge session manifests into NeMo diarization train/val JSON with your own tooling (this repository only ships `scripts/sentence_level_multispeaker_simulator.py` under `scripts/`).
+Per session index `i`: `multispeaker_session_i.wav`, `multispeaker_session_i.rttm`, `multispeaker_session_i.json` (and CTM if enabled), plus a copied **`params.yaml`** under `--output_dir`. Merge session manifests into NeMo diarization train/val JSON with your own tooling. Under `scripts/`, this repo includes `sentence_level_multispeaker_simulator.py` (synthesis) and `inference.py` (minimal HF Sortformer diarize example).
 
 ### Synthesis example
 

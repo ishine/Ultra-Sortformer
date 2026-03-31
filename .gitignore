@@ -5,9 +5,10 @@ results/*
 CHANGELOG.md
 sortformer_autoresearch/
 
-# scripts: only sentence_level_multispeaker_simulator.py is tracked
+# scripts: tracked utilities only
 scripts/*
 !scripts/sentence_level_multispeaker_simulator.py
+!scripts/inference.py
 
 # ===== 데이터 (대용량) =====
 data/*
